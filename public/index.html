@@ -21,9 +21,7 @@ input[type=checkbox]{width:18px;height:18px;padding:0;flex:none;accent-color:var
 .pill{display:inline-block;background:#fef3c7;color:#854d0e;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:800}
 .hidden{display:none!important}.note{padding:12px;border-left:4px solid var(--gold);background:#fffbeb;border-radius:7px;font-size:13px;margin:14px 0}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:25px}
-.idbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:18px}
-.idbar .code{font:700 15px ui-monospace,Consolas,monospace;color:var(--navy);letter-spacing:1px}.idbar small{display:block;color:var(--muted);font-size:12px}
-.idbar .load{display:flex;gap:8px;flex-wrap:wrap}.idbar .load input{width:170px;text-transform:uppercase}
+nav button.newprofile{margin-top:8px;border-top:1px solid var(--line);border-radius:0 0 9px 9px;color:var(--muted);font-size:13px}
 .btn:disabled{opacity:.6;cursor:wait}.status.ok{color:var(--green)}.status.err{color:var(--red)}
 .proto{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:2px dashed #c4b5fd;background:#f5f3ff;color:#5b21b6;border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:13px}.proto b{font-weight:800}.proto label{display:flex;gap:8px;align-items:center;color:#5b21b6;cursor:pointer}
 .leaks{display:grid;grid-template-columns:1.2fr 110px 1.4fr;gap:8px 12px;align-items:center}.leaks .h{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}.leaks .name b{color:var(--navy)}.leaks .name span{display:block;font-size:12px;color:var(--muted)}
@@ -36,10 +34,6 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:25px}
 <body>
 <header><div class="headrow"><div><div class="brand">KLINIK BISNES SME</div><h1>LIVE LARIS AI BUILDER</h1><p>Dari viewers ke buyers — bina LIVE Selling Playbook anda.</p></div><span class="pill">V2</span></div></header>
 <div class="wrap">
-<div class="idbar">
-<div><small>Kod Peserta (simpan kod ini untuk sambung di peranti lain)</small><span id="pidLabel" class="code">Belum disimpan</span> <button class="btn light" id="copyPidBtn" onclick="copyPid()" style="padding:5px 10px;font-size:12px">Salin kod</button></div>
-<div class="load"><input id="loadCode" placeholder="LL-XXXXXXXX" maxlength="11" aria-label="Kod peserta"><button class="btn" id="loadBtn" onclick="loadFromCode()">Muat Profil</button><button class="btn light" onclick="newProfile()">Profil Baru</button></div>
-</div>
 <div class="layout">
 <nav>
 <button class="active" data-tab="business">01 · Profil Bisnes</button>
@@ -48,6 +42,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:25px}
 <button data-tab="tools">04 · AI Prompt Cards</button>
 <button data-tab="commit">05 · Komitmen &amp; Semakan</button>
 <button data-tab="playbook">06 · Master Playbook</button>
+<button class="newprofile" onclick="newProfile()">↺ Mula profil baru</button>
 </nav>
 <main>
 
@@ -162,7 +157,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:25px}
 <div class="actions"><button class="btn green" onclick="approveOutput()">✓ Lulus &amp; simpan</button></div>
 <div id="approvedList"></div>
 </div>
-<div class="note">Keselamatan data: profil disimpan ke Google Sheet penganjur program dan boleh dibuka semula dengan Kod Peserta. Jangan kongsi kod anda, dan jangan masukkan maklumat sensitif pelanggan atau dokumen sulit.</div>
+<div class="note">Keselamatan data: profil disimpan ke Google Sheet penganjur program dan dalam browser ini. Jangan masukkan maklumat sensitif pelanggan atau dokumen sulit.</div>
 </section>
 </main></div></div>
 <footer>LIVE LARIS AI BUILDER · V2 · Klinik Bisnes SME</footer>

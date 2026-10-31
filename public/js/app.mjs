@@ -23,7 +23,8 @@ function fields() { return document.querySelectorAll('main section input,main se
 function collect() { const d = {}; fields().forEach((e) => { if (e.id) d[e.id] = e.type === 'checkbox' ? (e.checked ? '✓' : '') : e.value }); return d }
 function fill(d) { Object.entries(d || {}).forEach(([k, v]) => { const e = $(k); if (!e || !e.closest('main section')) return; if (e.type === 'checkbox') e.checked = !!v; else e.value = v }) }
 function setStatus(msg, kind) { document.querySelectorAll('.status.sync').forEach((s) => { s.textContent = msg; s.className = 'status sync' + (kind ? ' ' + kind : '') }) }
-function setPid(id) { participantId = id || ''; if (id) store.set(PID_KEY, id); else store.del(PID_KEY); $('pidLabel').textContent = id || 'Belum disimpan'; $('copyPidBtn').classList.toggle('hidden', !id) }
+// The participant id stays internal: it keeps this browser's saves on the same Sheet row.
+function setPid(id) { participantId = id || ''; if (id) store.set(PID_KEY, id); else store.del(PID_KEY) }
 function saveApprovals() { store.set(APPROVE_KEY, JSON.stringify(approvals)) }
 
 function saveProfile(silent) {
@@ -40,25 +41,10 @@ function saveProfile(silent) {
   return saving;
 }
 function loadCached() { try { fill(JSON.parse(store.get(CACHE_KEY) || '{}')) } catch { /* corrupt cache */ } setPid(participantId) }
-async function loadFromCode() {
-  const code = $('loadCode').value.trim().toUpperCase();
-  if (!/^LL-[A-Z0-9]{8}$/.test(code)) { alert('Format kod tidak sah. Contoh: LL-AB12CD34'); return }
-  $('loadBtn').disabled = true; setStatus('Memuat profil…');
-  try {
-    const r = await api('/api/profile/' + encodeURIComponent(code));
-    fill(r.data); store.set(CACHE_KEY, JSON.stringify(collect()));
-    approvals = r.approvals || {}; saveApprovals(); renderModules(); renderApprovals();
-    setPid(r.participantId); $('loadCode').value = '';
-    setStatus('✓ Profil dimuatkan · dikemas kini ' + r.updatedAt, 'ok'); next('business');
-  } catch (err) {
-    setStatus('✗ ' + err.message, 'err'); if (err.status === 404) alert('Kod peserta tidak dijumpai.');
-  } finally { $('loadBtn').disabled = false }
-}
 function newProfile() {
-  if (!confirm('Mula profil baru? Borang akan dikosongkan pada peranti ini. Profil lama kekal dalam Google Sheet dan boleh dimuat semula dengan kodnya.')) return;
+  if (!confirm('Mula profil baru? Borang akan dikosongkan pada peranti ini. Profil lama kekal dalam Google Sheet.')) return;
   store.del(CACHE_KEY); store.del(APPROVE_KEY); setPid(''); location.reload();
 }
-function copyPid() { copyText(participantId).then(() => setStatus('✓ Kod peserta disalin: ' + participantId, 'ok')).catch(() => prompt('Salin kod peserta anda:', participantId)) }
 function copyText(t) { return navigator.clipboard && window.isSecureContext ? navigator.clipboard.writeText(t).catch(() => legacyCopy(t)) : legacyCopy(t) }
 function legacyCopy(t) {
   return new Promise((res, rej) => {
@@ -116,9 +102,9 @@ function openChatGPT() { window.open('https://chatgpt.com/', '_blank', 'noopener
 function next(id) { document.querySelectorAll('main section').forEach((s) => s.classList.toggle('hidden', s.id !== id)); document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('active', b.dataset.tab === id)); window.scrollTo({ top: 0 }) }
 
 // Inline onclick handlers in index.html call these.
-Object.assign(window, { saveProfile, loadFromCode, newProfile, copyPid, makePrompt, approveOutput, copyPrompt, downloadProfile, openChatGPT, next });
+Object.assign(window, { saveProfile, newProfile, makePrompt, approveOutput, copyPrompt, downloadProfile, openChatGPT, next });
 
-document.querySelectorAll('nav button').forEach((b) => b.addEventListener('click', () => next(b.dataset.tab)));
+document.querySelectorAll('nav button[data-tab]').forEach((b) => b.addEventListener('click', () => next(b.dataset.tab)));
 $('qcList').innerHTML = QC_ITEMS.map((q, i) => `<label><input type="checkbox" id="qc${i}"> ${q}</label>`).join('');
 loadCached(); renderModules(); renderApprovals();
 // Autosave a few seconds after the participant changes any field
