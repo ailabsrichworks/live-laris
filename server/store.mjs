@@ -43,9 +43,10 @@ const stamp = () => new Date().toISOString().replace('T', ' ').slice(0, 19);
 export function memoryStore() {
   const profiles = new Map();
   const log = [];
+  const answers = [];
   return {
     kind: 'memory',
-    profiles, log,
+    profiles, log, answers,
     async ping() { return { ok: true } },
     async saveProfile(data) {
       const id = profiles.has(data.participantId) || /^LL-[A-Z0-9]{8}$/.test(data.participantId || '') ? data.participantId : newId();
@@ -64,6 +65,7 @@ export function memoryStore() {
       if (!p) throw Object.assign(new Error('Profil tidak dijumpai'), { code: 404 });
       const at = stamp();
       p.approvals[cardId] = { text, at };
+      answers.push({ participantId: id, cardId, answer: text, at });
       return { at };
     },
     async logPrompt(entry) { log.push({ ...entry, at: stamp() }); return true },

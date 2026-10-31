@@ -15,6 +15,7 @@ const SPREADSHEET_ID = '1pFane-L61EKY7L-ePNt7ry2ZlCjlzacVNqXSVnhZUZ4'; // "klini
 
 const PROFILE_SHEET = 'LiveLaris Profiles';
 const PROMPT_SHEET = 'LiveLaris Prompt Log';
+const ANSWER_SHEET = 'LiveLaris Answer Log';
 const TIMEZONE = 'Asia/Kuala_Lumpur';
 const MAX_LEN = 5000;
 const MAX_APPROVAL = 45000; // a cell holds 50,000 characters
@@ -69,7 +70,9 @@ const SYSTEM_KEYS = ['participantId', 'createdAt', 'updatedAt', 'lastModule', 'l
 const FORM_KEYS = PROFILE_COLUMNS.map(c => c.key).filter(k => SYSTEM_KEYS.indexOf(k) === -1 && k.indexOf('approved_') !== 0);
 const CARD_IDS = PROFILE_COLUMNS.map(c => c.key).filter(k => k.indexOf('approved_') === 0).map(k => k.slice(9));
 
-const PROMPT_HEADERS = ['timestamp', 'participantId', 'businessName', 'productName', 'module', 'source', 'model', 'inputTokens', 'outputTokens', 'note'];
+const PROMPT_HEADERS = ['timestamp', 'participantId', 'businessName', 'productName', 'module', 'source', 'model', 'inputTokens', 'outputTokens', 'note', 'prompt'];
+// One row per approval, so re-approving a card keeps the earlier answers.
+const ANSWER_HEADERS = ['timestamp', 'participantId', 'businessName', 'productName', 'card', 'answer'];
 
 function doPost(e) {
   let out;
@@ -93,7 +96,8 @@ function doGet() {
 /** Run once from the editor: creates or upgrades the tabs and styles the headers. */
 function setup() {
   profileSheet_();
-  promptSheet_();
+  logSheet_(PROMPT_SHEET, PROMPT_HEADERS);
+  logSheet_(ANSWER_SHEET, ANSWER_HEADERS);
   Logger.log('✓ Tabs ready in "%s"', spreadsheet_().getName());
 }
 
@@ -144,12 +148,17 @@ function loadProfile_(participantId) {
 
 function saveApproval_(participantId, cardId, text) {
   if (CARD_IDS.indexOf(cardId) === -1) throw new Error('Kad tidak sah: ' + cardId);
+  const answer = String(text || '').slice(0, MAX_APPROVAL);
+  let names = {};
   const out = withProfileRow_(participantId, false, (get, set, id, now) => {
-    set('approved_' + cardId, String(text || '').slice(0, MAX_APPROVAL));
+    set('approved_' + cardId, answer);
     set('updatedAt', now);
+    names = { participantId: id, businessName: get('businessName'), productName: get('productName') };
     return { at: now };
   });
   if (!out) throw new Error('Profil tidak dijumpai');
+  const card = PROFILE_COLUMNS.filter(c => c.key === 'approved_' + cardId)[0].header.split('\n')[1];
+  appendLog_(ANSWER_SHEET, ANSWER_HEADERS, Object.assign({ timestamp: out.at, card: card, answer: answer }, names));
   return out;
 }
 
@@ -157,7 +166,7 @@ function logPrompt_(entry) {
   entry = entry || {};
   const id = normaliseId_(entry.participantId);
   const now = stamp_();
-  promptSheet_().appendRow(PROMPT_HEADERS.map(h => h === 'timestamp' ? now : h === 'participantId' ? id : clean_(entry[h])));
+  appendLog_(PROMPT_SHEET, PROMPT_HEADERS, Object.assign({}, entry, { timestamp: now, participantId: id }));
   if (id) {
     withProfileRow_(id, false, (get, set) => {
       set('lastModule', entry.module);
@@ -239,17 +248,29 @@ function styleProfileHeader_(sh) {
   sh.getRange(1, 1, 1, n).protect().setDescription('Header — app bergantung pada nama lajur ini').setWarningOnly(true);
 }
 
-function promptSheet_() {
+/** A log tab with at least these headers; missing ones are added on the right. */
+function logSheet_(name, headers) {
   const ss = spreadsheet_();
-  const sh = ss.getSheetByName(PROMPT_SHEET) || ss.insertSheet(PROMPT_SHEET);
+  const sh = ss.getSheetByName(name) || ss.insertSheet(name);
   const current = sh.getLastColumn() ? headers_(sh) : [];
-  const missing = PROMPT_HEADERS.filter(h => current.indexOf(h) === -1);
+  const missing = headers.filter(h => current.indexOf(h) === -1);
   if (missing.length) {
     sh.getRange(1, current.length + 1, 1, missing.length).setValues([missing])
       .setFontWeight('bold').setBackground('#E8EAED').setVerticalAlignment('top');
     sh.setFrozenRows(1);
   }
   return sh;
+}
+
+/** Appends one row, placing each value under its header (column order in the Sheet doesn't matter). */
+function appendLog_(name, headers, values) {
+  const sh = logSheet_(name, headers);
+  const row = headers_(sh).map(h => {
+    if (h === 'timestamp' || h === 'participantId') return values[h] || '';
+    return clean_(values[h], h === 'prompt' || h === 'answer' ? MAX_APPROVAL : MAX_LEN);
+  });
+  const r = sh.getLastRow() + 1;
+  sh.getRange(r, 1, 1, row.length).setNumberFormat('@').setValues([row]);
 }
 
 function headers_(sh) {

@@ -32,7 +32,7 @@ test('saves, loads, approves and logs a participant', () => {
   assert.equal(gs.call('saveApproval', { participantId: id, cardId: 'nope', text: 'x' }).ok, false);
   assert.equal(gs.call('saveApproval', { participantId: 'LL-AAAAAAAA', cardId: 'rundown', text: 'x' }).ok, false);
 
-  gs.call('logPrompt', { entry: { participantId: id, module: 'LIVE Rundown', source: 'ai', model: 'claude-sonnet-5-5', inputTokens: 900 } });
+  gs.call('logPrompt', { entry: { participantId: id, module: 'LIVE Rundown', source: 'ai', model: 'claude-sonnet-5-5', inputTokens: 900, prompt: '=Anda ialah jurulatih LIVE…' } });
   gs.call('logPrompt', { entry: { participantId: id, module: 'Objection Coach', source: 'template' } });
 
   const p = gs.call('loadProfile', { participantId: id.toLowerCase() }).result;
@@ -49,7 +49,32 @@ test('saves, loads, approves and logs a participant', () => {
   const log = gs.sheets['LiveLaris Prompt Log'].g;
   assert.deepEqual(log[0], gs.PROMPT_HEADERS);
   assert.equal(log[1][gs.PROMPT_HEADERS.indexOf('source')], 'ai');
+  assert.equal(log[1][gs.PROMPT_HEADERS.indexOf('prompt')], '=Anda ialah jurulatih LIVE…', 'full prompt text, stored as text');
   assert.equal(gs.call('loadProfile', { participantId: 'LL-AAAAAAAA' }).result, null);
+});
+
+test('every approval is added to the Answer Log, so re-approving keeps history', () => {
+  const gs = loadAppsScript();
+  const id = gs.call('saveProfile', { data: { businessName: 'Aina Beauty', productName: 'Lips Serum' } }).result.participantId;
+  gs.call('saveApproval', { participantId: id, cardId: 'rundown', text: 'VERSI 1' });
+  gs.call('saveApproval', { participantId: id, cardId: 'rundown', text: 'VERSI 2' });
+  const log = gs.sheets['LiveLaris Answer Log'].g;
+  assert.deepEqual(log[0], gs.ANSWER_HEADERS);
+  assert.deepEqual(log.slice(1).map((r) => r.slice(1)), [
+    [id, 'Aina Beauty', 'Lips Serum', 'LIVE Rundown', 'VERSI 1'],
+    [id, 'Aina Beauty', 'Lips Serum', 'LIVE Rundown', 'VERSI 2'],
+  ]);
+  assert.deepEqual(gs.call('loadProfile', { participantId: id }).result.approvals, { rundown: { text: 'VERSI 2' } }, 'profile keeps the latest');
+});
+
+test('log rows go under the right headers even if the old Prompt Log lacks the prompt column', () => {
+  const gs = loadAppsScript();
+  const old = gs.ss.insertSheet('LiveLaris Prompt Log');
+  old.appendRow(['timestamp', 'participantId', 'businessName', 'productName', 'module']);
+  gs.call('logPrompt', { entry: { module: 'Selling Angles', source: 'ai', prompt: 'P' } });
+  assert.deepEqual(old.g[0], gs.PROMPT_HEADERS);
+  assert.equal(old.g[1][old.g[0].indexOf('module')], 'Selling Angles');
+  assert.equal(old.g[1][old.g[0].indexOf('prompt')], 'P');
 });
 
 test('upgrades a tab that only has the old V1 header, but never rewrites one with data', () => {

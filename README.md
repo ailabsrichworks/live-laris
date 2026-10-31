@@ -17,7 +17,9 @@ Participant tool for the Klinik Bisnes SME workshop **LIVE LARIS: Dari Viewers k
 
 **LiveLaris Profiles** has one row per participant with two-line, colour-coded headers like *Peserta v4*: REKOD · LANGKAH 1 PROFIL BISNES · LANGKAH 2 LIVE REALITY CHECK · LANGKAH 3 PRODUCT SELLING BLUEPRINT · LANGKAH 4 KOMITMEN & SEMAKAN · OUTPUT AI DILULUSKAN (one column per card) · AI · AKTIVITI. Columns are found by header text, so rename them in `Code.gs`, not in the Sheet. `npm test` checks that every form field has a column.
 
-**LiveLaris Prompt Log** has one row per card click: participant, card, `source` (`ai` or `template`), model, tokens, and a note on why the template was used.
+**LiveLaris Prompt Log** has one row per card click: participant, card, `source` (`ai` or `template`), model, tokens, a note on why the template was used, and the full `prompt` text.
+
+**LiveLaris Answer Log** has one row each time a participant approves a ChatGPT answer: participant, business, product, card and the full `answer`. Re-approving a card adds a new row, so earlier versions are kept. The Profiles tab holds only the latest approved answer per card.
 
 If the profile tab has no participant rows yet, `setup` rewrites its header in the current layout. If it has data, it only adds missing columns on the right.
 

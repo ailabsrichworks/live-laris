@@ -50,7 +50,7 @@ export function loadAppsScript({ secret = 'test-secret' } = {}) {
     ContentService: { MimeType: { JSON: 'json' }, createTextOutput: (t) => ({ text: t, setMimeType() { return this } }) },
     Logger: { log() {} },
   };
-  const names = ['doPost', 'doGet', 'setup', 'PROFILE_HEADERS', 'FORM_KEYS', 'CARD_IDS', 'PROMPT_HEADERS'];
+  const names = ['doPost', 'doGet', 'setup', 'PROFILE_HEADERS', 'FORM_KEYS', 'CARD_IDS', 'PROMPT_HEADERS', 'ANSWER_HEADERS'];
   const exported = new Function(...Object.keys(g), `${src}\nreturn { ${names.join(', ')} };`)(...Object.values(g));
   const call = (op, args = {}, s = secret) => JSON.parse(exported.doPost({ postData: { contents: JSON.stringify({ secret: s, op, ...args }) } }).text);
   return { ...exported, sheets, ss, call, mkSheet };

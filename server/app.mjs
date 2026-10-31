@@ -78,7 +78,7 @@ export function createApp({ store, writer, aiLimitPerIpHour = 30, now = Date.now
     store.logPrompt({
       participantId, businessName: data.businessName || '', productName: data.productName || '', module: card.name,
       source: out.source, model: out.model || '', inputTokens: out.usage?.input_tokens ?? '', outputTokens: out.usage?.output_tokens ?? '',
-      note: out.reason || '',
+      note: out.reason || '', prompt: out.prompt,
     }).catch((e) => log.error?.(`[log] ${e.message}`));
     res.json({ prompt: out.prompt, source: out.source, reason: out.reason || '' });
   }));

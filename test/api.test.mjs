@@ -51,6 +51,7 @@ test('writes a prompt with the AI and logs it', async (t) => {
   assert.equal(s.store.log[0].module, 'LIVE Rundown');
   assert.equal(s.store.log[0].source, 'ai');
   assert.equal(s.store.log[0].inputTokens, 10);
+  assert.equal(s.store.log[0].prompt, 'AI PROMPT rundown');
   assert.equal((await s.req('/api/prompt', { card: 'nope', data: {} })).status, 400);
 });
 
