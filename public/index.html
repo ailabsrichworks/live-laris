@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LIVE LARIS AI BUILDER</title>
+<style>
+:root{--navy:#14233b;--red:#b42332;--gold:#d8a64c;--ink:#263244;--muted:#64748b;--line:#e2e8f0;--bg:#f5f7fa;--white:#fff;--green:#15803d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px/1.5 Inter,Arial,sans-serif;color:var(--ink)}
+header{background:var(--navy);color:#fff;padding:22px max(20px,calc((100vw - 1100px)/2));}
+.brand{font-size:12px;letter-spacing:2px;color:#f3c66f;font-weight:800}.headrow{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}h1{margin:4px 0;font-size:28px}header p{margin:4px 0;color:#d5deeb}
+.wrap{max-width:1100px;margin:22px auto;padding:0 16px}.layout{display:grid;grid-template-columns:235px 1fr;gap:18px}
+nav,.panel,.module{background:var(--white);border:1px solid var(--line);border-radius:14px}
+nav{padding:12px;height:max-content;position:sticky;top:12px}nav button{width:100%;text-align:left;padding:12px;border:0;background:transparent;border-radius:9px;color:var(--ink);cursor:pointer;margin:2px 0;font:inherit}nav button.active{background:#edf2f8;color:var(--navy);font-weight:700}
+.panel{padding:22px}.panel h2{margin:0 0 5px;color:var(--navy)}.panel h3{margin:22px 0 8px;color:var(--navy);font-size:16px}.sub{color:var(--muted);margin:0 0 18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}label{font-size:13px;font-weight:700;color:#334155}input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px 11px;font:inherit;background:#fff;color:var(--ink)}textarea{min-height:80px;resize:vertical}
+input[type=checkbox]{width:18px;height:18px;padding:0;flex:none;accent-color:var(--navy)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}.btn{border:0;border-radius:9px;padding:10px 15px;font:inherit;font-weight:700;cursor:pointer;background:var(--navy);color:white}.btn.red{background:var(--red)}.btn.light{background:#eef2f7;color:var(--navy)}.btn.gold{background:var(--gold);color:#231a0a}.btn.green{background:var(--green)}.status{font-size:12px;color:var(--muted);margin-top:9px}
+.modules{display:grid;grid-template-columns:1fr 1fr;gap:12px}.module{padding:15px;position:relative}.module h3{font-size:15px;margin:0 0 5px;color:var(--navy)}.module p{font-size:13px;color:var(--muted);margin:0 0 12px}.module .ref{font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:.5px;margin-bottom:4px}
+.output.loading{color:var(--muted);font-style:italic}.badge{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;background:#dcfce7;color:var(--green);position:absolute;top:12px;right:12px}
+.output{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);padding:14px;border-radius:10px;max-height:380px;overflow:auto;font:13px/1.55 ui-monospace,Consolas,monospace}
+.pill{display:inline-block;background:#fef3c7;color:#854d0e;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:800}
+.hidden{display:none!important}.note{padding:12px;border-left:4px solid var(--gold);background:#fffbeb;border-radius:7px;font-size:13px;margin:14px 0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:25px}
+.idbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:18px}
+.idbar .code{font:700 15px ui-monospace,Consolas,monospace;color:var(--navy);letter-spacing:1px}.idbar small{display:block;color:var(--muted);font-size:12px}
+.idbar .load{display:flex;gap:8px;flex-wrap:wrap}.idbar .load input{width:170px;text-transform:uppercase}
+.btn:disabled{opacity:.6;cursor:wait}.status.ok{color:var(--green)}.status.err{color:var(--red)}
+.proto{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:2px dashed #c4b5fd;background:#f5f3ff;color:#5b21b6;border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:13px}.proto b{font-weight:800}.proto label{display:flex;gap:8px;align-items:center;color:#5b21b6;cursor:pointer}
+.leaks{display:grid;grid-template-columns:1.2fr 110px 1.4fr;gap:8px 12px;align-items:center}.leaks .h{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}.leaks .name b{color:var(--navy)}.leaks .name span{display:block;font-size:12px;color:var(--muted)}
+.checks{display:grid;gap:8px}.checks label{display:flex;gap:10px;align-items:flex-start;font-weight:500;font-size:14px;color:var(--ink);cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chips label{display:flex;gap:8px;align-items:center;border:1px solid #cbd5e1;border-radius:99px;padding:6px 12px;font-weight:500;cursor:pointer}
+.approve{border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px;padding:16px;margin-top:18px}.approve h3{margin:0 0 4px;color:var(--green)}
+.approved{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;background:#fff}.approved summary{cursor:pointer;font-weight:700;color:var(--navy)}.approved pre{white-space:pre-wrap;font:13px/1.5 ui-monospace,Consolas,monospace;margin:8px 0 0}
+@media(max-width:760px){.layout{grid-template-columns:1fr}nav{position:static;display:grid;grid-template-columns:1fr 1fr}.grid,.modules{grid-template-columns:1fr}.panel{padding:16px}h1{font-size:23px}.leaks{grid-template-columns:1fr 90px}.leaks .sign{grid-column:1/-1}.leaks .h:last-child{display:none}}
+</style></head>
+<body>
+<header><div class="headrow"><div><div class="brand">KLINIK BISNES SME</div><h1>LIVE LARIS AI BUILDER</h1><p>Dari viewers ke buyers — bina LIVE Selling Playbook anda.</p></div><span class="pill">V2</span></div></header>
+<div class="wrap">
+<div class="idbar">
+<div><small>Kod Peserta (simpan kod ini untuk sambung di peranti lain)</small><span id="pidLabel" class="code">Belum disimpan</span> <button class="btn light" id="copyPidBtn" onclick="copyPid()" style="padding:5px 10px;font-size:12px">Salin kod</button></div>
+<div class="load"><input id="loadCode" placeholder="LL-XXXXXXXX" maxlength="11" aria-label="Kod peserta"><button class="btn" id="loadBtn" onclick="loadFromCode()">Muat Profil</button><button class="btn light" onclick="newProfile()">Profil Baru</button></div>
+</div>
+<div class="layout">
+<nav>
+<button class="active" data-tab="business">01 · Profil Bisnes</button>
+<button data-tab="reality">02 · LIVE Reality Check</button>
+<button data-tab="product">03 · Product Blueprint</button>
+<button data-tab="tools">04 · AI Prompt Cards</button>
+<button data-tab="commit">05 · Komitmen &amp; Semakan</button>
+<button data-tab="playbook">06 · Master Playbook</button>
+</nav>
+<main>
+
+<section id="business" class="panel">
+<h2>Profil Bisnes</h2><p class="sub">Kenali pemilik, model bisnes dan pelanggan. Gunakan satu produk atau servis utama sepanjang latihan.</p>
+<div class="grid">
+<div class="field"><label>Nama pemilik</label><input id="owner" placeholder="Nama peserta"></div>
+<div class="field"><label>Nama bisnes / jenama</label><input id="businessName" placeholder="Nama bisnes"></div>
+<div class="field"><label>Tempoh operasi</label><select id="years"><option>Belum mula</option><option>Bawah 1 tahun</option><option selected>1–3 tahun</option><option>4–5 tahun</option><option>6–10 tahun</option><option>Lebih 10 tahun</option></select></div>
+<div class="field"><label>Model bisnes</label><select id="model"><option>B2C — jual terus kepada pengguna</option><option>B2B — jual kepada bisnes</option><option>B2B2C — melalui ejen/reseller</option><option>D2C — jenama sendiri, jual terus</option><option>Dropship</option><option>Agent / Reseller</option><option>Affiliate</option><option>Marketplace seller</option><option>Subscription / Membership</option><option>Servis / Projek</option><option>Hybrid — gabungan model</option></select></div>
+<div class="field"><label>Industri</label><select id="industry"><option>Makanan & Minuman</option><option>Fesyen & Pakaian</option><option selected>Kecantikan & Penjagaan Diri</option><option>Kesihatan & Wellness</option><option>Pendidikan & Latihan</option><option>Perkhidmatan Profesional</option><option>Automotif</option><option>Rumah & Dekorasi</option><option>Produk Bayi & Kanak-kanak</option><option>Teknologi & Elektronik</option><option>Pertanian & Ternakan</option><option>Pelancongan & Hospitaliti</option><option>Retail / Wholesale</option><option>Lain-lain</option></select></div>
+<div class="field"><label>Saiz team</label><select id="team"><option>Saya seorang</option><option selected>2–3 orang</option><option>4–10 orang</option><option>11–30 orang</option><option>Lebih 30 orang</option></select></div>
+<div class="field"><label>Lokasi operasi</label><input id="location" value="Online seluruh Malaysia"></div>
+<div class="field"><label>Jualan bulanan</label><select id="sales"><option>Bawah RM5,000</option><option selected>RM5,000–RM10,000</option><option>RM10,001–RM30,000</option><option>RM30,001–RM50,000</option><option>RM50,001–RM100,000</option><option>Lebih RM100,000</option><option>Belum konsisten</option></select></div>
+<div class="field"><label>Pelanggan sasaran</label><input id="customer" value="Wanita bekerja"></div>
+<div class="field"><label>Umur pelanggan</label><select id="age"><option>18–24 tahun</option><option selected>25–34 tahun</option><option>35–44 tahun</option><option>45–54 tahun</option><option>55 tahun ke atas</option><option>Pelbagai umur</option></select></div>
+<div class="field full"><label>Situasi atau masalah pelanggan</label><textarea id="customerNeed" placeholder="Dalam situasi apa masalah berlaku? Apa yang pelanggan risaukan sebelum membeli?"></textarea></div>
+<div class="field full"><label>Penerangan ringkas bisnes</label><textarea id="businessDesc" placeholder="Apa yang bisnes jual, kepada siapa dan bagaimana pelanggan membeli?"></textarea></div>
+</div>
+<div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Profil</button><button class="btn light" onclick="next('reality')">Seterusnya →</button></div><div class="status sync"></div>
+</section>
+
+<section id="reality" class="panel hidden">
+<h2>01 · LIVE Selling Reality Check</h2><p class="sub">Diagnosis dahulu. Jawab berdasarkan pengalaman sebenar, bukan apa yang anda rasa sepatutnya berlaku.</p>
+<div class="grid">
+<div class="field"><label>Platform LIVE</label><select id="platform"><option>TikTok Shop</option><option>Shopee Live</option><option>Facebook Live</option><option>Instagram Live</option><option>Pelbagai platform</option></select></div>
+<div class="field"><label>Pengalaman LIVE</label><select id="experience"><option>Belum pernah LIVE</option><option>Pernah LIVE tetapi tidak konsisten</option><option selected>Sudah LIVE tetapi jualan rendah</option><option>LIVE konsisten dan ada jualan</option><option>LIVE konsisten tetapi mahu scale up</option></select></div>
+<div class="field"><label>Berapa kali saya LIVE dalam 30 hari terakhir?</label><input id="liveCount30" placeholder="Contoh: 8 kali"></div>
+<div class="field"><label>Berapa lama purata LIVE saya?</label><input id="liveDuration" placeholder="Contoh: 45 minit"></div>
+<div class="field full"><label>Apa berlaku apabila viewers masuk?</label><textarea id="viewersEnter" placeholder="Contoh: ramai masuk dan keluar dalam beberapa saat; ada yang tanya harga sahaja."></textarea></div>
+<div class="field full"><label>Soalan paling kerap ditanya?</label><textarea id="commonQuestions" placeholder="Contoh: harga, kos penghantaran, sesuai untuk kulit sensitif?"></textarea></div>
+<div class="field full"><label>Bagaimana pelanggan membeli? (checkout)</label><select id="checkout"><option>TikTok Shop / bakul kuning</option><option>Shopee checkout</option><option>Website / online store</option><option>WhatsApp / DM</option><option>Transfer bank / invois</option><option>Ejen / reseller</option><option>Belum ada proses tetap</option></select></div>
+</div>
+<h3>Lima titik kebocoran LIVE</h3>
+<p class="sub" style="margin-bottom:10px">Beri keutamaan 1 (paling kecil) hingga 5 (paling teruk). Baiki titik paling lemah dahulu.</p>
+<div class="leaks">
+<div class="h">Titik kebocoran</div><div class="h">Keutamaan</div><div class="h">Tanda yang saya alami</div>
+<div class="name"><b>Attention</b><span>Viewers tidak berhenti scroll</span></div><select id="leakAttention"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><input class="sign" id="leakAttentionSign" placeholder="Tanda…">
+<div class="name"><b>Retention</b><span>Viewers masuk tetapi cepat keluar</span></div><select id="leakRetention"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><input class="sign" id="leakRetentionSign" placeholder="Tanda…">
+<div class="name"><b>Interest</b><span>Viewers menonton tetapi tidak bertanya</span></div><select id="leakInterest"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><input class="sign" id="leakInterestSign" placeholder="Tanda…">
+<div class="name"><b>Confidence</b><span>Viewers bertanya tetapi belum yakin</span></div><select id="leakConfidence"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><input class="sign" id="leakConfidenceSign" placeholder="Tanda…">
+<div class="name"><b>Action</b><span>Viewers berminat tetapi tidak checkout</span></div><select id="leakAction"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><input class="sign" id="leakActionSign" placeholder="Tanda…">
+</div>
+<div class="grid" style="margin-top:16px">
+<div class="field full"><label>Satu perkara paling penting yang saya mahu perbaiki</label><textarea id="improveOne"></textarea></div>
+<div class="field full"><label>Pilih 2 metrik yang akan saya rekod selepas LIVE</label>
+<div class="chips">
+<label><input type="checkbox" id="mAttention">Attention · viewers masuk</label>
+<label><input type="checkbox" id="mEngagement">Engagement · komen &amp; soalan</label>
+<label><input type="checkbox" id="mIntent">Intent · klik / tanya harga</label>
+<label><input type="checkbox" id="mConversion">Conversion · pesanan selesai</label>
+<label><input type="checkbox" id="mFollowup">Follow-up · pertanyaan selepas LIVE</label>
+</div></div>
+<div class="field full"><label>Matlamat LIVE</label><select id="goal"><option selected>Meningkatkan jualan melalui LIVE</option><option>Mendapat pelanggan baharu</option><option>Meningkatkan conversion penonton kepada pembeli</option><option>Memperkenalkan produk baharu</option><option>Menghabiskan stok sedia ada</option><option>Membina jenama dan kepercayaan</option><option>Membina komuniti pelanggan</option></select></div>
+<div class="field full"><label>Maklumat tambahan tentang operasi LIVE</label><textarea id="liveExtra" placeholder="Waktu LIVE, bilangan host, alat, kekangan dan lain-lain."></textarea></div>
+</div>
+<div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Reality Check</button><button class="btn light" onclick="next('product')">Seterusnya →</button></div><div class="status sync"></div>
+</section>
+
+<section id="product" class="panel hidden">
+<h2>02 · Product Selling Blueprint</h2><p class="sub">Blueprint ini menjadi sumber maklumat untuk AI. Isi fakta sebenar; jika belum pasti, tandakan <b>PERLU SEMAK</b>.</p>
+<div class="grid">
+<div class="field"><label>Jenis tawaran</label><select id="productType"><option>Produk fizikal</option><option>Produk digital</option><option>Perkhidmatan</option><option>Produk + Perkhidmatan</option><option>Kursus / Coaching / Membership</option><option>Makanan siap / Tempahan</option></select></div>
+<div class="field"><label>Nama produk / servis fokus</label><input id="productName" value="Lips Serum"></div>
+<div class="field"><label>Harga jualan</label><input id="price" value="RM29"></div>
+<div class="field"><label>Saiz / isipadu / variasi</label><input id="size" value="10ml"></div>
+<div class="field full"><label>Ciri, bahan atau spesifikasi (fakta)</label><textarea id="features" placeholder="Saiz, bahan, fungsi, kandungan, packaging."></textarea></div>
+<div class="field full"><label>Manfaat yang boleh disokong</label><textarea id="benefits" placeholder="Bagaimana setiap ciri membantu pelanggan. Jangan masukkan janji yang belum disahkan.">Mengandungi vitamin C; membantu menyegarkan, melembapkan dan menjadikan bibir tidak kusam (maklumat diberikan pemilik; bukti belum diperiksa).</textarea></div>
+<div class="field full"><label>Bukti / dokumen / sijil (nyatakan jenis sebenar)</label><textarea id="proof" placeholder="Demonstrasi, label, spesifikasi, testimoni sah — jangan sekadar tulis 'KKM approved'.">Ada sijil / dokumen lain; jenis dokumen belum dikenal pasti.</textarea></div>
+<div class="field full"><label>Perbezaan / keunikan</label><textarea id="difference" placeholder="Apa yang membezakan produk daripada pilihan lain? Hanya fakta yang boleh disahkan."></textarea></div>
+<div class="field full"><label>Review pelanggan sebenar</label><textarea id="reviews" placeholder="Ringkasan review sebenar, dengan izin dan tanpa maklumat peribadi.">Ada review pelanggan; kandungan belum diberikan.</textarea></div>
+<div class="field"><label>Stok / kapasiti</label><input id="stock" value="200 unit"></div>
+<div class="field"><label>Tawaran / pakej sebenar</label><input id="offer" value="Free postage sempena 11.11"></div>
+<div class="field full"><label>Demo yang boleh ditunjukkan</label><textarea id="demo" placeholder="Tekstur, packaging, cara penggunaan, proses servis.">Tekstur serum/liquid, kotak, botol dan applicator.</textarea></div>
+<div class="field full"><label>Objection / soalan pelanggan yang biasa diterima</label><textarea id="objections" placeholder="Pisahkan dengan titik koma.">Harga mahal; Saya fikir dahulu; Apa beza dengan produk lain?; Sesuai untuk saya?; Boleh kurang lagi?; Boleh hilangkan bibir gelap?</textarea></div>
+<div class="field full"><label>Cara penggunaan / amaran label / polisi</label><textarea id="productExtra">Boleh digunakan bila-bila masa (maklumat diberikan pemilik).</textarea></div>
+<div class="field full"><label>Maklumat PERLU SEMAK</label><textarea id="toVerify" placeholder="Senaraikan fakta yang belum disahkan: harga, sijil, dakwaan, stok, syarat promosi…"></textarea></div>
+</div>
+<div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Blueprint</button><button class="btn light" onclick="next('tools')">Pergi ke AI Prompt Cards →</button></div><div class="status sync"></div>
+</section>
+
+<section id="tools" class="panel hidden">
+<h2>AI Prompt Cards</h2><p class="sub">Ikut susunan kelas. Klik kad dan AI akan menulis prompt khusus untuk bisnes anda berdasarkan profil, Reality Check dan Blueprint.</p>
+<div class="note">Cara guna: klik “Jana prompt AI”, salin prompt ke ChatGPT, semak hasilnya, kemudian tampal &amp; luluskan. AI tidak boleh mengesahkan fakta produk bagi pihak anda.</div>
+<div class="modules" id="moduleGrid"></div>
+</section>
+
+<section id="commit" class="panel hidden">
+<h2>10 · Final Playbook Quality Check</h2><p class="sub">Sebelum pulang, tandakan setiap item yang sudah lengkap.</p>
+<div class="checks" id="qcList"></div>
+<h3>11 · My Next LIVE Commitment</h3>
+<div class="grid">
+<div class="field"><label>Tarikh dan masa LIVE seterusnya</label><input id="nextLiveAt" placeholder="Contoh: Rabu 9 malam"></div>
+<div class="field"><label>Produk yang akan difokuskan</label><input id="nextProduct"></div>
+<div class="field"><label>Satu perubahan yang akan diuji</label><input id="nextChange" placeholder="Contoh: uji 2 opening hooks"></div>
+<div class="field"><label>Metrik yang akan direkod</label><input id="nextMetric" placeholder="Contoh: pertanyaan dan pesanan"></div>
+<div class="field"><label>Tarikh semak hasil LIVE</label><input id="reviewDate"></div>
+<div class="field full"><label>Nota / tindakan susulan</label><textarea id="commitNotes"></textarea></div>
+</div>
+<div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Komitmen</button><button class="btn red" onclick="makePrompt('playbook')">Jana Master Playbook →</button></div><div class="status sync"></div>
+</section>
+
+<section id="playbook" class="panel hidden">
+<h2>Prompt Workspace</h2><p class="sub">AI menulis prompt khusus berdasarkan jawapan anda. Salin ke ChatGPT, kemudian tampal jawapannya di bawah untuk diluluskan.</p>
+<div id="promptSource" class="status"></div><div id="promptBox" class="output">Pilih mana-mana AI Prompt Card untuk membina arahan.</div>
+<div class="actions"><button class="btn" onclick="copyPrompt()">Salin Prompt</button><button class="btn light" onclick="downloadProfile()">Muat Turun Profil (.txt)</button><button class="btn gold" onclick="openChatGPT()">Buka ChatGPT</button></div>
+<div id="copyStatus" class="status"></div>
+<div id="approveBox" class="approve">
+<h3>Tampal jawapan AI &amp; luluskan</h3>
+<p class="sub" style="margin-bottom:10px">Input → AI → <b>Semak / Edit → Lulus</b> → Master Playbook. Buang apa-apa yang tidak tepat sebelum meluluskan.</p>
+<div class="field"><label id="approveLabel">Jawapan AI</label><textarea id="aiOutput" style="min-height:160px" placeholder="Tampal jawapan ChatGPT di sini dan edit…"></textarea></div>
+<div class="actions"><button class="btn green" onclick="approveOutput()">✓ Lulus &amp; simpan</button></div>
+<div id="approvedList"></div>
+</div>
+<div class="note">Keselamatan data: profil disimpan ke Google Sheet penganjur program dan boleh dibuka semula dengan Kod Peserta. Jangan kongsi kod anda, dan jangan masukkan maklumat sensitif pelanggan atau dokumen sulit.</div>
+</section>
+</main></div></div>
+<footer>LIVE LARIS AI BUILDER · V2 · Klinik Bisnes SME</footer>
+<script type="module" src="/js/app.mjs"></script></body></html>
