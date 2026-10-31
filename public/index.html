@@ -2,87 +2,197 @@
 <html lang="ms">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LIVE LARIS AI BUILDER</title>
+<title>LIVE LARIS AI Builder · Klinik Bisnes SME</title>
+<meta name="theme-color" content="#f7eee1">
+<meta name="description" content="LIVE LARIS AI Builder — bina LIVE Selling Playbook untuk bisnes anda, dari viewers ke buyers.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/img/favicon-64.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <style>
-:root{--navy:#14233b;--navy-2:#1f3354;--red:#b42332;--gold:#d8a64c;--ink:#1e293b;--muted:#556275;--line:#dbe2ea;--bg:#f4f6f9;--white:#fff;--green:#15803d;--green-bg:#ecfdf3;--focus:#2563eb;color-scheme:light}
+/* LIVE LARIS — same design system as Business Quick Fix (klinik-bisnes-sme repo, public/css/app.css):
+   nude, red, black and white; Inter for text, Bricolage Grotesque for headings; 44px+ targets, visible focus. */
+:root{--ink:#000;--muted:#5c534a;--text:#2e2924;--nude:#f7eee1;--nude-2:#efe1cc;--red:#c02026;--red-2:#9d1a1f;--white:#fff;--line:#ebe1d3;--field:#d8c9b4;--soft:#fcf8f2;--ok:#1f6f3f;--ok-bg:#e8f4ec;--error-bg:#fdecec;--error-ink:#8f171c;
+--font-display:'Bricolage Grotesque','Inter',ui-sans-serif,system-ui,sans-serif;--font-body:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:light}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);font:16px/1.55 'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;color:var(--ink)}
-header{background:var(--navy);color:#fff;padding:22px max(20px,calc((100vw - 1100px)/2))}
-.brand{font-size:12px;letter-spacing:2px;color:#f3c66f;font-weight:700}h1{margin:4px 0;font-size:28px;line-height:1.2}header p{margin:4px 0 0;color:#d5deeb}
-.wrap{max-width:1100px;margin:20px auto;padding:0 16px}
-.progress{display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:14px;color:var(--muted)}
-.progress .bar{flex:1;height:8px;background:#e3e8ef;border-radius:99px;overflow:hidden}
-.progress .bar span{display:block;height:100%;width:0;background:var(--green);border-radius:99px;transition:width .3s ease}
-.progress b{color:var(--navy)}
-.layout{display:grid;grid-template-columns:250px 1fr;gap:18px}
-nav,.panel,.module{background:var(--white);border:1px solid var(--line);border-radius:14px}
-nav{padding:10px;height:max-content;position:sticky;top:12px}
-nav button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:44px;text-align:left;padding:10px 12px;border:0;background:transparent;border-radius:9px;color:var(--ink);cursor:pointer;margin:2px 0;font:inherit;font-size:15px;transition:background .2s}
-nav button:hover{background:#f1f4f8}
-nav button.active{background:#e8eef7;color:var(--navy);font-weight:700}
-.step-status{flex:none;font-size:12px;font-weight:700;color:var(--muted);background:#eef1f5;border-radius:99px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px}
-.step-status.done{color:var(--green);background:var(--green-bg)}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--white);color:var(--ink);font:400 16px/1.55 var(--font-body)}
+h1,h2,h3,h4{font-family:var(--font-display);color:var(--ink)}
+button,input,textarea,select{font:inherit;color:inherit}
+a{color:var(--red)}
+:where(a,button,input,textarea,select,summary,label):focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+svg{width:20px;height:20px;flex-shrink:0}
+.hidden,[hidden]{display:none!important}
+
+.wrap{max-width:1080px;margin:auto;padding:20px 16px 60px}
+@media(min-width:761px){.wrap{padding:28px 18px 60px}}
+
+/* header: Klinik Bisnes SME (left) and RCG (right) */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+.brand{display:block;line-height:0;border-radius:6px}
+.brand img{height:58px;width:auto;display:block}
+.partner{height:52px;width:auto;display:block}
+@media(min-width:761px){.brand img{height:76px}.partner{height:68px}}
+
+/* hero */
+.hero{background:var(--nude);color:var(--ink);border-radius:26px;padding:clamp(24px,5vw,48px);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;width:230px;height:230px;border:1px solid #0000001a;border-radius:50%;right:-55px;top:-65px;box-shadow:0 0 0 28px #ffffff40,0 0 0 58px #ffffff26;pointer-events:none}
+.eyebrow{color:var(--red);font-size:12px;letter-spacing:.15em;font-weight:800;text-transform:uppercase}
+.hero h1{font-size:clamp(30px,5vw,54px);line-height:1.04;letter-spacing:-.035em;margin:14px 0;max-width:650px;font-weight:800}
+.hero p{color:var(--text);max-width:650px;margin:0;font-size:17px}
+.steps{display:flex;gap:8px;margin:24px 0 0;padding:0;list-style:none;flex-wrap:wrap}
+.steps li{border:1px solid #00000033;border-radius:999px;padding:7px 11px;font-size:12px;color:var(--ink);background:#ffffff66}
+
+/* overall progress */
+.progress{display:flex;align-items:center;gap:12px;margin:22px 0 0;font-size:13px;color:var(--muted)}
+.progress .bar{flex:1;height:6px;background:var(--nude-2);border-radius:99px;overflow:hidden}
+.progress .bar span{display:block;height:100%;width:0;background:var(--red);transition:width .2s}
+.progress b{color:var(--ink)}
+
+/* layout: steps menu + main panel */
+.layout{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
+@media(min-width:761px){.layout{grid-template-columns:290px minmax(0,1fr);gap:22px}}
+nav,.panel{background:var(--white);border:1px solid var(--line);border-radius:22px;padding:17px}
+@media(min-width:761px){nav,.panel{padding:22px}nav{align-self:start;position:sticky;top:16px}.panel{min-height:560px}}
+.panel{min-width:0}
+nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media(min-width:761px){nav{grid-template-columns:1fr}}
+nav button{display:flex;gap:10px;align-items:center;width:100%;min-height:44px;padding:10px;border:1px solid var(--line);background:#fff;border-radius:15px;text-align:left;cursor:pointer;color:var(--ink);transition:border-color .15s,background .15s}
+nav button:hover{border-color:var(--field)}
+nav button.active{background:var(--nude);border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.caticon{width:36px;height:36px;border-radius:11px;background:var(--nude);color:var(--ink);display:grid;place-items:center;flex-shrink:0}
+nav button.active .caticon{background:var(--ink);color:var(--nude)}
+.navtext{display:flex;flex-direction:column;gap:3px;min-width:0}
+.navtext strong{font-size:14px;line-height:1.25}
+.step-status{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--muted)}
+.step-status svg{width:14px;height:14px}
+.step-status.done{color:var(--ok)}
 .step-status:empty{display:none}
-nav button.newprofile{margin-top:8px;border-top:1px solid var(--line);border-radius:0 0 9px 9px;color:var(--muted);font-size:14px;justify-content:flex-start}
-.panel{padding:24px}.panel h2{margin:0 0 6px;color:var(--navy);line-height:1.25}.panel h3{margin:24px 0 8px;color:var(--navy);font-size:17px}.sub{color:var(--muted);margin:0 0 20px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}
-label{font-size:14px;font-weight:700;color:#2b3648}
-input,select,textarea{width:100%;min-height:44px;border:1px solid #b8c3d1;border-radius:9px;padding:10px 12px;font:inherit;background:#fff;color:var(--ink);transition:border-color .15s,box-shadow .15s}
-input::placeholder,textarea::placeholder{color:#7a8597}
-input:hover,select:hover,textarea:hover{border-color:#8e9bb0}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(37,99,235,.25)}
-textarea{min-height:88px;resize:vertical}
-input[type=checkbox]{width:20px;height:20px;min-height:0;padding:0;flex:none;accent-color:var(--navy);cursor:pointer}
-:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:0;border-radius:9px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;background:var(--navy);color:#fff;transition:background .2s,filter .2s}
-.btn:hover{background:var(--navy-2)}.btn.red{background:var(--red)}.btn.light{background:#e8edf4;color:var(--navy)}.btn.gold{background:var(--gold);color:#231a0a}.btn.green{background:var(--green)}
-.btn.red:hover,.btn.gold:hover,.btn.green:hover,.btn.light:hover{filter:brightness(.94)}
-.btn:disabled{opacity:.55;cursor:not-allowed;filter:none}
-.status{font-size:14px;color:var(--muted);margin-top:10px;min-height:1.4em}.status.ok{color:var(--green)}.status.err{color:var(--red)}
-.icon{width:18px;height:18px;flex:none}
-.modules{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.module{padding:16px;position:relative;display:flex;flex-direction:column}
-.module h3{font-size:16px;margin:0 0 6px;color:var(--navy);padding-right:110px}.module p{font-size:14px;color:var(--muted);margin:0 0 10px}
-.module .ref{font-size:12px;color:#6b7686;font-weight:700;letter-spacing:.5px;margin-bottom:4px}
-.module details{font-size:14px;color:var(--muted);margin:0 0 12px}.module summary{cursor:pointer;color:var(--navy);font-weight:700;min-height:32px;display:flex;align-items:center}.module details p{margin:6px 0 0}
+nav button.newprofile{grid-column:1/-1;border-style:dashed;color:var(--muted);font-size:14px;justify-content:center}
+nav button.newprofile svg{width:18px;height:18px}
+@media(min-width:761px){nav button{gap:12px;padding:14px}.caticon{width:40px;height:40px;border-radius:12px}.navtext strong{font-size:15px}}
+
+/* section text */
+.label{font-size:11px;letter-spacing:.12em;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.panel h2{margin:0 0 8px;letter-spacing:-.02em;line-height:1.15;font-size:clamp(22px,3vw,26px)}
+.panel h3{margin:26px 0 8px;font-size:19px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+.note{background:#fff9ed;border:1px solid #f0dfbd;border-radius:12px;padding:12px 14px;font-size:14px;color:#5e5139;margin:16px 0}
+
+/* fields */
+.grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:761px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.field{display:block}.field.full{grid-column:1/-1}
+.field label,.fieldlabel{display:block;font-size:14px;font-weight:700;margin:0 0 6px}
+input,select,textarea{width:100%;min-height:48px;border:1px solid var(--field);border-radius:10px;padding:12px;background:#fff;font-size:16px;transition:border-color .15s}
+input:hover,select:hover,textarea:hover{border-color:#bfae96}
+input::placeholder,textarea::placeholder{color:#8a7f72}
+textarea{line-height:1.5;min-height:96px;resize:vertical}
+input[type=checkbox]{width:20px;height:20px;min-height:0;padding:0;flex-shrink:0;accent-color:var(--red);cursor:pointer}
+
+/* buttons: red primary, outlined ghost */
+.actions{display:flex;align-items:center;gap:12px;margin-top:22px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border:0;background:var(--red);color:#fff;padding:12px 20px;border-radius:12px;font-weight:800;cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s}
+.btn svg{width:18px;height:18px}
+.btn:hover:not(:disabled){background:var(--red-2)}
+.btn.light,.btn.gold{min-height:44px;border:1px solid var(--field);background:#fff;color:var(--ink);padding:10px 16px;font-weight:700}
+.btn.light:hover:not(:disabled),.btn.gold:hover:not(:disabled){background:#fff;border-color:var(--ink)}
+.btn:disabled{opacity:.38;cursor:not-allowed}
+.status{font-size:14px;color:var(--muted);margin-top:10px;min-height:1.4em}.status.ok{color:var(--ok)}.status.err{color:var(--error-ink)}
+
+/* Reality Check */
+.leaks{display:grid;grid-template-columns:1.2fr 120px 1.4fr;gap:10px 12px;align-items:center}
+.leaks .h{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.leaks .name b{display:block;font-family:var(--font-display);font-size:16px}.leaks .name span{display:block;font-size:13px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{display:flex;gap:8px;align-items:center;min-height:44px;border:1px solid var(--line);border-radius:14px;padding:10px 13px;font-size:15px;font-weight:400;margin:0;cursor:pointer;transition:border-color .15s,background .15s}
+.chips label:hover{border-color:var(--field)}
+.chips label:has(input:checked){border-color:var(--ink);background:var(--nude);box-shadow:inset 0 0 0 1px var(--ink)}
+.checks{display:grid;gap:10px}
+.checks label{display:flex;gap:12px;align-items:flex-start;min-height:48px;border:1px solid var(--line);border-radius:14px;padding:13px;font-size:15px;cursor:pointer;transition:border-color .15s,background .15s}
+.checks label:hover{border-color:var(--field)}
+.checks label:has(input:checked){border-color:var(--ink);background:var(--nude);box-shadow:inset 0 0 0 1px var(--ink)}
+.checks input{margin-top:2px}
+
+/* AI prompt cards */
+.modules{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:761px){.modules{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.module{position:relative;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;padding:17px;background:#fff}
+.module .ref{font-size:11px;letter-spacing:.12em;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:6px;padding-right:110px}
+.module h3{margin:0 0 6px;font-size:17px;letter-spacing:-.01em;line-height:1.25}
+.module p{font-size:15px;color:var(--text);margin:0 0 10px}
+.module details{font-size:14px;color:var(--muted);margin:0 0 14px}
+.module summary{cursor:pointer;font-weight:700;color:var(--ink);min-height:32px;display:flex;align-items:center}
+.module details p{font-size:14px;color:var(--muted);margin:6px 0 0}
 .module .btn{margin-top:auto;align-self:flex-start}
-.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--green-bg);color:var(--green);position:absolute;top:14px;right:14px}
-.output{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);padding:16px;border-radius:10px;max-height:420px;overflow:auto;font:14px/1.6 ui-monospace,Consolas,monospace}
-.output.loading{display:flex;align-items:center;gap:12px;font:inherit;color:var(--muted)}
-.spinner{width:22px;height:22px;border:3px solid #cfd8e3;border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;flex:none}
-@keyframes spin{to{transform:rotate(360deg)}}
-.source{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--muted);margin:0 0 8px;min-height:1.4em}.source.ai{color:var(--green)}
-.hidden{display:none!important}.note{padding:12px 14px;border-left:4px solid var(--gold);background:#fffbeb;border-radius:7px;font-size:14px;margin:16px 0}
-footer{text-align:center;color:var(--muted);font-size:13px;padding:28px}
-.leaks{display:grid;grid-template-columns:1.2fr 120px 1.4fr;gap:10px 12px;align-items:center}.leaks .h{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}.leaks .name b{color:var(--navy)}.leaks .name span{display:block;font-size:13px;color:var(--muted)}
-.checks{display:grid;gap:6px}.checks label{display:flex;gap:12px;align-items:flex-start;font-weight:400;font-size:15px;color:var(--ink);cursor:pointer;padding:8px 10px;border-radius:9px;min-height:44px}.checks label:hover{background:#f4f6f9}
-.chips{display:flex;flex-wrap:wrap;gap:8px}.chips label{display:flex;gap:8px;align-items:center;border:1px solid #b8c3d1;border-radius:99px;padding:8px 14px;min-height:44px;font-weight:400;cursor:pointer;transition:background .15s,border-color .15s}.chips label:hover{border-color:var(--navy)}.chips label:has(input:checked){background:#e8eef7;border-color:var(--navy);color:var(--navy);font-weight:700}
-.approve{border:1px solid #bbe5c8;background:#f3fbf6;border-radius:12px;padding:18px;margin-top:20px}.approve h3{margin:0 0 4px;color:var(--green)}
-.approved{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;background:#fff}.approved summary{cursor:pointer;font-weight:700;color:var(--navy);min-height:32px}.approved pre{white-space:pre-wrap;font:14px/1.5 ui-monospace,Consolas,monospace;margin:8px 0 0}
-@media(max-width:760px){.layout{grid-template-columns:1fr}nav{position:static;display:grid;grid-template-columns:1fr 1fr;gap:4px}nav button{flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;font-size:14px;line-height:1.3;padding:8px 10px}nav button.newprofile{grid-column:1/-1;flex-direction:row;align-items:center}.grid,.modules{grid-template-columns:1fr}.panel{padding:18px}h1{font-size:23px}.leaks{grid-template-columns:1fr 100px}.leaks .sign{grid-column:1/-1}.leaks .h:last-child{display:none}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}}
+.badge{display:inline-flex;align-items:center;gap:4px;min-height:28px;padding:3px 10px;border-radius:999px;background:var(--nude);color:var(--ink);font-size:13px;font-weight:700;position:absolute;top:14px;right:14px}
+.badge svg{width:14px;height:14px}
+
+/* prompt workspace */
+.source{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin:0 0 10px;min-height:1.4em}.source.ai{color:var(--ink);font-weight:700}.source.ai svg{color:var(--red)}
+.output{white-space:pre-wrap;background:var(--soft);border-left:4px solid var(--ink);padding:16px;border-radius:0 12px 12px 0;max-height:440px;overflow:auto;font:14px/1.6 ui-monospace,Consolas,monospace;color:var(--text)}
+.output.loading{display:flex;align-items:center;gap:18px;padding:28px 16px;font:700 16px/1.4 var(--font-body);color:var(--ink)}
+.spinner{width:30px;height:30px;border-radius:50%;background:var(--red);box-shadow:0 0 0 0 #c0202666;animation:pulse 1.4s ease-out infinite;flex-shrink:0}
+@keyframes pulse{to{box-shadow:0 0 0 22px #c0202600}}
+.approve{margin-top:20px;border:1px solid var(--line);border-radius:18px;padding:18px;background:#fff}
+.approve h3{margin:0 0 6px}
+.approved{border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-top:8px;background:#fff}
+.approved summary{cursor:pointer;font-weight:700;color:var(--ink);min-height:32px;display:flex;align-items:center}
+.approved pre{white-space:pre-wrap;font:14px/1.5 var(--font-body);color:var(--text);margin:8px 0 4px}
+
+.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:25px}
+.footer p{margin:0 0 6px}.footer .footer-brand{color:var(--ink);font-weight:700;font-size:13px}
+
+@media(max-width:760px){.leaks{grid-template-columns:1fr 100px}.leaks .sign{grid-column:1/-1}.leaks .h:last-child{display:none}}
+@media(max-width:430px){nav{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}.spinner{animation:none}}
 </style></head>
 <body>
-<header><div class="headrow"><div><div class="brand">KLINIK BISNES SME</div><h1>LIVE LARIS AI BUILDER</h1><p>Dari viewers ke buyers — bina LIVE Selling Playbook anda.</p></div></div></header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-profile" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5 5.5 4h13L20 9.5"/><path d="M4 9.5V20h16V9.5"/><path d="M4 9.5h16"/><path d="M10 20v-5h4v5"/></g></symbol>
+<symbol id="i-sales" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></g></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></g></symbol>
+<symbol id="i-sparkle" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/></g></symbol>
+<symbol id="i-checklist" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="m4 6 1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></g></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></g></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></g></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></g></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></g></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></g></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-external" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
 <div class="wrap">
+<header class="top">
+<a class="brand" href="/"><img src="/img/klinik-bisnes-sme.png" alt="Klinik Bisnes SME by Richworks X Academy" width="134" height="134"></a>
+<img class="partner" src="/img/rcg.png" alt="RCG — Transforming Businesses, Driving Growth" width="333" height="240">
+</header>
+
+<section class="hero">
+<div class="eyebrow">LIVE LARIS · Dari viewers ke buyers</div>
+<h1>Bina LIVE Selling Playbook untuk bisnes anda.</h1>
+<p>Isi profil, kenal pasti titik kebocoran LIVE dan susun blueprint produk. AI akan menulis prompt khusus untuk setiap langkah, dan anda luluskan hasil yang tepat.</p>
+<ol class="steps" aria-label="Aliran sesi"><li>01 Profil</li><li>02 Reality Check</li><li>03 Blueprint</li><li>04 AI Prompt Cards</li><li>05 Komitmen</li><li>06 Playbook</li></ol>
+</section>
+
 <div class="progress"><div class="bar" role="progressbar" aria-label="Kemajuan keseluruhan" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar"><span id="progressFill"></span></div><span id="progressText"><b>0%</b> lengkap</span></div>
 <div class="layout">
-<nav>
-<button class="active" data-tab="business"><span>01 · Profil Bisnes</span><span class="step-status" id="st-business"></span></button>
-<button data-tab="reality"><span>02 · LIVE Reality Check</span><span class="step-status" id="st-reality"></span></button>
-<button data-tab="product"><span>03 · Product Blueprint</span><span class="step-status" id="st-product"></span></button>
-<button data-tab="tools"><span>04 · AI Prompt Cards</span><span class="step-status" id="st-tools"></span></button>
-<button data-tab="commit"><span>05 · Komitmen &amp; Semakan</span><span class="step-status" id="st-commit"></span></button>
-<button data-tab="playbook"><span>06 · Master Playbook</span><span class="step-status" id="st-playbook"></span></button>
-<button class="newprofile" onclick="newProfile()">↺ Mula profil baru</button>
+<nav aria-label="Langkah">
+<button class="active" data-tab="business"><span class="caticon"><svg aria-hidden="true"><use href="#i-profile"/></svg></span><span class="navtext"><strong>01 · Profil Bisnes</strong><span class="step-status" id="st-business"></span></span></button>
+<button data-tab="reality"><span class="caticon"><svg aria-hidden="true"><use href="#i-sales"/></svg></span><span class="navtext"><strong>02 · LIVE Reality Check</strong><span class="step-status" id="st-reality"></span></span></button>
+<button data-tab="product"><span class="caticon"><svg aria-hidden="true"><use href="#i-box"/></svg></span><span class="navtext"><strong>03 · Product Blueprint</strong><span class="step-status" id="st-product"></span></span></button>
+<button data-tab="tools"><span class="caticon"><svg aria-hidden="true"><use href="#i-sparkle"/></svg></span><span class="navtext"><strong>04 · AI Prompt Cards</strong><span class="step-status" id="st-tools"></span></span></button>
+<button data-tab="commit"><span class="caticon"><svg aria-hidden="true"><use href="#i-checklist"/></svg></span><span class="navtext"><strong>05 · Komitmen &amp; Semakan</strong><span class="step-status" id="st-commit"></span></span></button>
+<button data-tab="playbook"><span class="caticon"><svg aria-hidden="true"><use href="#i-book"/></svg></span><span class="navtext"><strong>06 · Master Playbook</strong><span class="step-status" id="st-playbook"></span></span></button>
+<button class="newprofile" onclick="newProfile()"><svg aria-hidden="true"><use href="#i-refresh"/></svg>Mula profil baru</button>
 </nav>
 <main>
 
 <section id="business" class="panel">
+<div class="label">Langkah 01 · Profil bisnes</div>
 <h2>Profil Bisnes</h2><p class="sub">Kenali pemilik, model bisnes dan pelanggan. Gunakan satu produk atau servis utama sepanjang latihan.</p>
 <div class="grid">
 <div class="field"><label for="owner">Nama pemilik</label><input id="owner" placeholder="Nama peserta"></div>
@@ -102,7 +212,8 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:28px}
 </section>
 
 <section id="reality" class="panel hidden">
-<h2>01 · LIVE Selling Reality Check</h2><p class="sub">Diagnosis dahulu. Jawab berdasarkan pengalaman sebenar, bukan apa yang anda rasa sepatutnya berlaku.</p>
+<div class="label">Langkah 02 · Reality check</div>
+<h2>LIVE Selling Reality Check</h2><p class="sub">Diagnosis dahulu. Jawab berdasarkan pengalaman sebenar, bukan apa yang anda rasa sepatutnya berlaku.</p>
 <div class="grid">
 <div class="field"><label for="platform">Platform LIVE</label><select id="platform"><option value="">— Pilih —</option><option>TikTok Shop</option><option>Shopee Live</option><option>Facebook Live</option><option>Instagram Live</option><option>Pelbagai platform</option></select></div>
 <div class="field"><label for="experience">Pengalaman LIVE</label><select id="experience"><option value="">— Pilih —</option><option>Belum pernah LIVE</option><option>Pernah LIVE tetapi tidak konsisten</option><option>Sudah LIVE tetapi jualan rendah</option><option>LIVE konsisten dan ada jualan</option><option>LIVE konsisten tetapi mahu scale up</option></select></div>
@@ -113,7 +224,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:28px}
 <div class="field full"><label for="checkout">Bagaimana pelanggan membeli? (checkout)</label><select id="checkout"><option value="">— Pilih —</option><option>TikTok Shop / bakul kuning</option><option>Shopee checkout</option><option>Website / online store</option><option>WhatsApp / DM</option><option>Transfer bank / invois</option><option>Ejen / reseller</option><option>Belum ada proses tetap</option></select></div>
 </div>
 <h3>Lima titik kebocoran LIVE</h3>
-<p class="sub" style="margin-bottom:10px">Beri keutamaan 1 (paling kecil) hingga 5 (paling teruk). Baiki titik paling lemah dahulu.</p>
+<p class="sub">Beri keutamaan 1 (paling kecil) hingga 5 (paling teruk). Baiki titik paling lemah dahulu.</p>
 <div class="leaks">
 <div class="h">Titik kebocoran</div><div class="h">Keutamaan</div><div class="h">Tanda yang saya alami</div>
 <div class="name"><b>Attention</b><span>Viewers tidak berhenti scroll</span></div><select id="leakAttention" aria-label="Attention · keutamaan"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><input class="sign" id="leakAttentionSign" aria-label="Attention · tanda yang saya alami" placeholder="Tanda…">
@@ -124,7 +235,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:28px}
 </div>
 <div class="grid" style="margin-top:16px">
 <div class="field full"><label for="improveOne">Satu perkara paling penting yang saya mahu perbaiki</label><textarea id="improveOne"></textarea></div>
-<div class="field full"><label>Pilih 2 metrik yang akan saya rekod selepas LIVE</label>
+<div class="field full" role="group" aria-labelledby="metricsLabel"><span class="fieldlabel" id="metricsLabel">Pilih 2 metrik yang akan saya rekod selepas LIVE</span>
 <div class="chips">
 <label><input type="checkbox" id="mAttention">Attention · viewers masuk</label>
 <label><input type="checkbox" id="mEngagement">Engagement · komen &amp; soalan</label>
@@ -139,7 +250,8 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:28px}
 </section>
 
 <section id="product" class="panel hidden">
-<h2>02 · Product Selling Blueprint</h2><p class="sub">Blueprint ini menjadi sumber maklumat untuk AI. Isi fakta sebenar; jika belum pasti, tandakan <b>PERLU SEMAK</b>.</p>
+<div class="label">Langkah 03 · Product blueprint</div>
+<h2>Product Selling Blueprint</h2><p class="sub">Blueprint ini menjadi sumber maklumat untuk AI. Isi fakta sebenar; jika belum pasti, tandakan <b>PERLU SEMAK</b>.</p>
 <div class="grid">
 <div class="field"><label for="productType">Jenis tawaran</label><select id="productType"><option value="">— Pilih —</option><option>Produk fizikal</option><option>Produk digital</option><option>Perkhidmatan</option><option>Produk + Perkhidmatan</option><option>Kursus / Coaching / Membership</option><option>Makanan siap / Tempahan</option></select></div>
 <div class="field"><label for="productName">Nama produk / servis fokus</label><input id="productName"></div>
@@ -161,15 +273,17 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:28px}
 </section>
 
 <section id="tools" class="panel hidden">
+<div class="label">Langkah 04 · AI prompt cards</div>
 <h2>AI Prompt Cards</h2><p class="sub">Ikut susunan kelas. Klik kad dan AI akan menulis prompt khusus untuk bisnes anda berdasarkan profil, Reality Check dan Blueprint.</p>
 <div class="note">Cara guna: klik “Jana prompt AI”, salin prompt ke ChatGPT, semak hasilnya, kemudian tampal &amp; luluskan. AI tidak boleh mengesahkan fakta produk bagi pihak anda.</div>
 <div class="modules" id="moduleGrid"></div>
 </section>
 
 <section id="commit" class="panel hidden">
-<h2>10 · Final Playbook Quality Check</h2><p class="sub">Sebelum pulang, tandakan setiap item yang sudah lengkap.</p>
+<div class="label">Langkah 05 · Komitmen &amp; semakan</div>
+<h2>Final Playbook Quality Check</h2><p class="sub">Sebelum pulang, tandakan setiap item yang sudah lengkap.</p>
 <div class="checks" id="qcList"></div>
-<h3>11 · My Next LIVE Commitment</h3>
+<h3>My Next LIVE Commitment</h3>
 <div class="grid">
 <div class="field"><label for="nextLiveAt">Tarikh dan masa LIVE seterusnya</label><input id="nextLiveAt" placeholder="Contoh: Rabu 9 malam"></div>
 <div class="field"><label for="nextProduct">Produk yang akan difokuskan</label><input id="nextProduct"></div>
@@ -182,19 +296,21 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:28px}
 </section>
 
 <section id="playbook" class="panel hidden">
+<div class="label">Langkah 06 · Master playbook</div>
 <h2>Prompt Workspace</h2><p class="sub">AI menulis prompt khusus berdasarkan jawapan anda. Salin ke ChatGPT, kemudian tampal jawapannya di bawah untuk diluluskan.</p>
 <div id="promptSource" class="source" aria-live="polite"></div><div id="promptBox" class="output" aria-live="polite">Pilih mana-mana AI Prompt Card untuk membina arahan.</div>
-<div class="actions"><button class="btn" onclick="copyPrompt()">Salin Prompt</button><button class="btn light" onclick="downloadProfile()">Muat Turun Profil (.txt)</button><button class="btn gold" onclick="openChatGPT()">Buka ChatGPT</button></div>
+<div class="actions"><button class="btn" onclick="copyPrompt()"><svg aria-hidden="true"><use href="#i-copy"/></svg>Salin Prompt</button><button class="btn light" onclick="downloadProfile()"><svg aria-hidden="true"><use href="#i-download"/></svg>Muat Turun Profil (.txt)</button><button class="btn gold" onclick="openChatGPT()"><svg aria-hidden="true"><use href="#i-external"/></svg>Buka ChatGPT</button></div>
 <div id="copyStatus" class="status" aria-live="polite"></div>
 <div id="approveBox" class="approve">
 <h3>Tampal jawapan AI &amp; luluskan</h3>
-<p class="sub" style="margin-bottom:10px">Input → AI → <b>Semak / Edit → Lulus</b> → Master Playbook. Buang apa-apa yang tidak tepat sebelum meluluskan.</p>
-<div class="field"><label id="approveLabel">Jawapan AI</label><textarea id="aiOutput" style="min-height:160px" placeholder="Tampal jawapan ChatGPT di sini dan edit…"></textarea></div>
-<div class="actions"><button class="btn green" onclick="approveOutput()">✓ Lulus &amp; simpan</button></div>
+<p class="sub">Input → AI → <b>Semak / Edit → Lulus</b> → Master Playbook. Buang apa-apa yang tidak tepat sebelum meluluskan.</p>
+<div class="field"><label id="approveLabel" for="aiOutput">Jawapan AI</label><textarea id="aiOutput" style="min-height:160px" placeholder="Tampal jawapan ChatGPT di sini dan edit…"></textarea></div>
+<div class="actions"><button class="btn" onclick="approveOutput()"><svg aria-hidden="true"><use href="#i-check"/></svg>Lulus &amp; simpan</button></div>
 <div id="approvedList"></div>
 </div>
 <div class="note">Keselamatan data: profil disimpan ke Google Sheet penganjur program dan dalam browser ini. Jangan masukkan maklumat sensitif pelanggan atau dokumen sulit.</div>
 </section>
-</main></div></div>
-<footer>LIVE LARIS AI BUILDER · V2 · Klinik Bisnes SME</footer>
+</main></div>
+<footer class="footer"><p class="footer-brand">LIVE LARIS AI Builder | Klinik Bisnes SME | Richworks X Academy | powered by RCG</p><p><b>Penafian AI:</b> Prompt dan output AI adalah draf awal berasaskan input anda. Semak semua fakta, harga dan dakwaan sebelum digunakan; hasil jualan tidak dijamin.</p></footer>
+</div>
 <script type="module" src="/js/app.mjs"></script></body></html>

@@ -9,14 +9,9 @@ const store = {
 const CACHE_KEY = 'liveLarisProfileV2', PID_KEY = 'liveLarisPidV2', APPROVE_KEY = 'liveLarisApprovedV2';
 let participantId = store.get(PID_KEY) || '', saving = null, autoTimer = null, currentCard = null, generating = false;
 
-// Inline SVG icons (Lucide shapes), decorative: the text next to them carries the meaning.
-const svg = (d) => `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
-const ICON = {
-  check: svg('<path d="M20 6 9 17l-5-5"/>'),
-  sparkle: svg('<path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/>'),
-  info: svg('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>'),
-  arrow: svg('<path d="M5 12h14M13 5l7 7-7 7"/>'),
-};
+// Icons from the SVG sprite in index.html (same set as Business Quick Fix); decorative, the text carries the meaning.
+const use = (id) => `<svg aria-hidden="true"><use href="#${id}"/></svg>`;
+const ICON = { check: use('i-check'), sparkle: use('i-sparkle'), info: use('i-info'), arrow: use('i-arrow') };
 let approvals = {};
 try { approvals = JSON.parse(store.get(APPROVE_KEY) || '{}') } catch { /* corrupt cache */ }
 
@@ -147,10 +142,11 @@ function updateProgress() {
 function copyPrompt() { copyText($('promptBox').textContent).then(() => ($('copyStatus').textContent = '✓ Prompt disalin. Tampal ke ChatGPT.')).catch(() => ($('copyStatus').textContent = 'Pilih dan salin teks prompt secara manual.')) }
 function downloadProfile() { const blob = new Blob([profileText(collect())], { type: 'text/plain;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'LIVE-LARIS-Profil-Peserta.txt'; a.click(); URL.revokeObjectURL(a.href) }
 function openChatGPT() { window.open('https://chatgpt.com/', '_blank', 'noopener') }
-function next(id) {
+function next(id, scroll = true) {
   document.querySelectorAll('main section').forEach((s) => s.classList.toggle('hidden', s.id !== id));
   document.querySelectorAll('nav button[data-tab]').forEach((b) => { const on = b.dataset.tab === id; b.classList.toggle('active', on); if (on) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current') });
-  window.scrollTo({ top: 0 });
+  // Land on the step itself (below the hero), not the top of the page.
+  if (scroll) window.scrollTo({ top: Math.max(0, document.querySelector('.progress').getBoundingClientRect().top + window.scrollY - 12) });
 }
 
 // Inline onclick handlers in index.html call these.
@@ -158,7 +154,7 @@ Object.assign(window, { saveProfile, newProfile, makePrompt, approveOutput, copy
 
 document.querySelectorAll('nav button[data-tab]').forEach((b) => b.addEventListener('click', () => next(b.dataset.tab)));
 $('qcList').innerHTML = QC_ITEMS.map((q, i) => `<label><input type="checkbox" id="qc${i}"> ${q}</label>`).join('');
-loadCached(); renderModules(); renderApprovals(); updateProgress(); next('business');
+loadCached(); renderModules(); renderApprovals(); updateProgress(); next('business', false);
 // Autosave a few seconds after the participant changes any field
 fields().forEach((e) => {
   e.addEventListener('input', updateProgress);
