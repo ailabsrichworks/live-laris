@@ -51,14 +51,14 @@ nav button.newprofile{margin-top:8px;border-top:1px solid var(--line);border-rad
 <div class="grid">
 <div class="field"><label>Nama pemilik</label><input id="owner" placeholder="Nama peserta"></div>
 <div class="field"><label>Nama bisnes / jenama</label><input id="businessName" placeholder="Nama bisnes"></div>
-<div class="field"><label>Tempoh operasi</label><select id="years"><option>Belum mula</option><option>Bawah 1 tahun</option><option selected>1–3 tahun</option><option>4–5 tahun</option><option>6–10 tahun</option><option>Lebih 10 tahun</option></select></div>
-<div class="field"><label>Model bisnes</label><select id="model"><option>B2C — jual terus kepada pengguna</option><option>B2B — jual kepada bisnes</option><option>B2B2C — melalui ejen/reseller</option><option>D2C — jenama sendiri, jual terus</option><option>Dropship</option><option>Agent / Reseller</option><option>Affiliate</option><option>Marketplace seller</option><option>Subscription / Membership</option><option>Servis / Projek</option><option>Hybrid — gabungan model</option></select></div>
-<div class="field"><label>Industri</label><select id="industry"><option>Makanan & Minuman</option><option>Fesyen & Pakaian</option><option selected>Kecantikan & Penjagaan Diri</option><option>Kesihatan & Wellness</option><option>Pendidikan & Latihan</option><option>Perkhidmatan Profesional</option><option>Automotif</option><option>Rumah & Dekorasi</option><option>Produk Bayi & Kanak-kanak</option><option>Teknologi & Elektronik</option><option>Pertanian & Ternakan</option><option>Pelancongan & Hospitaliti</option><option>Retail / Wholesale</option><option>Lain-lain</option></select></div>
-<div class="field"><label>Saiz team</label><select id="team"><option>Saya seorang</option><option selected>2–3 orang</option><option>4–10 orang</option><option>11–30 orang</option><option>Lebih 30 orang</option></select></div>
-<div class="field"><label>Lokasi operasi</label><input id="location" value="Online seluruh Malaysia"></div>
-<div class="field"><label>Jualan bulanan</label><select id="sales"><option>Bawah RM5,000</option><option selected>RM5,000–RM10,000</option><option>RM10,001–RM30,000</option><option>RM30,001–RM50,000</option><option>RM50,001–RM100,000</option><option>Lebih RM100,000</option><option>Belum konsisten</option></select></div>
-<div class="field"><label>Pelanggan sasaran</label><input id="customer" value="Wanita bekerja"></div>
-<div class="field"><label>Umur pelanggan</label><select id="age"><option>18–24 tahun</option><option selected>25–34 tahun</option><option>35–44 tahun</option><option>45–54 tahun</option><option>55 tahun ke atas</option><option>Pelbagai umur</option></select></div>
+<div class="field"><label>Tempoh operasi</label><select id="years"><option value="">— Pilih —</option><option>Belum mula</option><option>Bawah 1 tahun</option><option>1–3 tahun</option><option>4–5 tahun</option><option>6–10 tahun</option><option>Lebih 10 tahun</option></select></div>
+<div class="field"><label>Model bisnes</label><select id="model"><option value="">— Pilih —</option><option>B2C — jual terus kepada pengguna</option><option>B2B — jual kepada bisnes</option><option>B2B2C — melalui ejen/reseller</option><option>D2C — jenama sendiri, jual terus</option><option>Dropship</option><option>Agent / Reseller</option><option>Affiliate</option><option>Marketplace seller</option><option>Subscription / Membership</option><option>Servis / Projek</option><option>Hybrid — gabungan model</option></select></div>
+<div class="field"><label>Industri</label><select id="industry"><option value="">— Pilih —</option><option>Makanan & Minuman</option><option>Fesyen & Pakaian</option><option>Kecantikan & Penjagaan Diri</option><option>Kesihatan & Wellness</option><option>Pendidikan & Latihan</option><option>Perkhidmatan Profesional</option><option>Automotif</option><option>Rumah & Dekorasi</option><option>Produk Bayi & Kanak-kanak</option><option>Teknologi & Elektronik</option><option>Pertanian & Ternakan</option><option>Pelancongan & Hospitaliti</option><option>Retail / Wholesale</option><option>Lain-lain</option></select></div>
+<div class="field"><label>Saiz team</label><select id="team"><option value="">— Pilih —</option><option>Saya seorang</option><option>2–3 orang</option><option>4–10 orang</option><option>11–30 orang</option><option>Lebih 30 orang</option></select></div>
+<div class="field"><label>Lokasi operasi</label><input id="location"></div>
+<div class="field"><label>Jualan bulanan</label><select id="sales"><option value="">— Pilih —</option><option>Bawah RM5,000</option><option>RM5,000–RM10,000</option><option>RM10,001–RM30,000</option><option>RM30,001–RM50,000</option><option>RM50,001–RM100,000</option><option>Lebih RM100,000</option><option>Belum konsisten</option></select></div>
+<div class="field"><label>Pelanggan sasaran</label><input id="customer"></div>
+<div class="field"><label>Umur pelanggan</label><select id="age"><option value="">— Pilih —</option><option>18–24 tahun</option><option>25–34 tahun</option><option>35–44 tahun</option><option>45–54 tahun</option><option>55 tahun ke atas</option><option>Pelbagai umur</option></select></div>
 <div class="field full"><label>Situasi atau masalah pelanggan</label><textarea id="customerNeed" placeholder="Dalam situasi apa masalah berlaku? Apa yang pelanggan risaukan sebelum membeli?"></textarea></div>
 <div class="field full"><label>Penerangan ringkas bisnes</label><textarea id="businessDesc" placeholder="Apa yang bisnes jual, kepada siapa dan bagaimana pelanggan membeli?"></textarea></div>
 </div>
@@ -68,13 +68,13 @@ nav button.newprofile{margin-top:8px;border-top:1px solid var(--line);border-rad
 <section id="reality" class="panel hidden">
 <h2>01 · LIVE Selling Reality Check</h2><p class="sub">Diagnosis dahulu. Jawab berdasarkan pengalaman sebenar, bukan apa yang anda rasa sepatutnya berlaku.</p>
 <div class="grid">
-<div class="field"><label>Platform LIVE</label><select id="platform"><option>TikTok Shop</option><option>Shopee Live</option><option>Facebook Live</option><option>Instagram Live</option><option>Pelbagai platform</option></select></div>
-<div class="field"><label>Pengalaman LIVE</label><select id="experience"><option>Belum pernah LIVE</option><option>Pernah LIVE tetapi tidak konsisten</option><option selected>Sudah LIVE tetapi jualan rendah</option><option>LIVE konsisten dan ada jualan</option><option>LIVE konsisten tetapi mahu scale up</option></select></div>
+<div class="field"><label>Platform LIVE</label><select id="platform"><option value="">— Pilih —</option><option>TikTok Shop</option><option>Shopee Live</option><option>Facebook Live</option><option>Instagram Live</option><option>Pelbagai platform</option></select></div>
+<div class="field"><label>Pengalaman LIVE</label><select id="experience"><option value="">— Pilih —</option><option>Belum pernah LIVE</option><option>Pernah LIVE tetapi tidak konsisten</option><option>Sudah LIVE tetapi jualan rendah</option><option>LIVE konsisten dan ada jualan</option><option>LIVE konsisten tetapi mahu scale up</option></select></div>
 <div class="field"><label>Berapa kali saya LIVE dalam 30 hari terakhir?</label><input id="liveCount30" placeholder="Contoh: 8 kali"></div>
 <div class="field"><label>Berapa lama purata LIVE saya?</label><input id="liveDuration" placeholder="Contoh: 45 minit"></div>
 <div class="field full"><label>Apa berlaku apabila viewers masuk?</label><textarea id="viewersEnter" placeholder="Contoh: ramai masuk dan keluar dalam beberapa saat; ada yang tanya harga sahaja."></textarea></div>
 <div class="field full"><label>Soalan paling kerap ditanya?</label><textarea id="commonQuestions" placeholder="Contoh: harga, kos penghantaran, sesuai untuk kulit sensitif?"></textarea></div>
-<div class="field full"><label>Bagaimana pelanggan membeli? (checkout)</label><select id="checkout"><option>TikTok Shop / bakul kuning</option><option>Shopee checkout</option><option>Website / online store</option><option>WhatsApp / DM</option><option>Transfer bank / invois</option><option>Ejen / reseller</option><option>Belum ada proses tetap</option></select></div>
+<div class="field full"><label>Bagaimana pelanggan membeli? (checkout)</label><select id="checkout"><option value="">— Pilih —</option><option>TikTok Shop / bakul kuning</option><option>Shopee checkout</option><option>Website / online store</option><option>WhatsApp / DM</option><option>Transfer bank / invois</option><option>Ejen / reseller</option><option>Belum ada proses tetap</option></select></div>
 </div>
 <h3>Lima titik kebocoran LIVE</h3>
 <p class="sub" style="margin-bottom:10px">Beri keutamaan 1 (paling kecil) hingga 5 (paling teruk). Baiki titik paling lemah dahulu.</p>
@@ -96,7 +96,7 @@ nav button.newprofile{margin-top:8px;border-top:1px solid var(--line);border-rad
 <label><input type="checkbox" id="mConversion">Conversion · pesanan selesai</label>
 <label><input type="checkbox" id="mFollowup">Follow-up · pertanyaan selepas LIVE</label>
 </div></div>
-<div class="field full"><label>Matlamat LIVE</label><select id="goal"><option selected>Meningkatkan jualan melalui LIVE</option><option>Mendapat pelanggan baharu</option><option>Meningkatkan conversion penonton kepada pembeli</option><option>Memperkenalkan produk baharu</option><option>Menghabiskan stok sedia ada</option><option>Membina jenama dan kepercayaan</option><option>Membina komuniti pelanggan</option></select></div>
+<div class="field full"><label>Matlamat LIVE</label><select id="goal"><option value="">— Pilih —</option><option>Meningkatkan jualan melalui LIVE</option><option>Mendapat pelanggan baharu</option><option>Meningkatkan conversion penonton kepada pembeli</option><option>Memperkenalkan produk baharu</option><option>Menghabiskan stok sedia ada</option><option>Membina jenama dan kepercayaan</option><option>Membina komuniti pelanggan</option></select></div>
 <div class="field full"><label>Maklumat tambahan tentang operasi LIVE</label><textarea id="liveExtra" placeholder="Waktu LIVE, bilangan host, alat, kekangan dan lain-lain."></textarea></div>
 </div>
 <div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Reality Check</button><button class="btn light" onclick="next('product')">Seterusnya →</button></div><div class="status sync"></div>
@@ -105,20 +105,20 @@ nav button.newprofile{margin-top:8px;border-top:1px solid var(--line);border-rad
 <section id="product" class="panel hidden">
 <h2>02 · Product Selling Blueprint</h2><p class="sub">Blueprint ini menjadi sumber maklumat untuk AI. Isi fakta sebenar; jika belum pasti, tandakan <b>PERLU SEMAK</b>.</p>
 <div class="grid">
-<div class="field"><label>Jenis tawaran</label><select id="productType"><option>Produk fizikal</option><option>Produk digital</option><option>Perkhidmatan</option><option>Produk + Perkhidmatan</option><option>Kursus / Coaching / Membership</option><option>Makanan siap / Tempahan</option></select></div>
-<div class="field"><label>Nama produk / servis fokus</label><input id="productName" value="Lips Serum"></div>
-<div class="field"><label>Harga jualan</label><input id="price" value="RM29"></div>
-<div class="field"><label>Saiz / isipadu / variasi</label><input id="size" value="10ml"></div>
+<div class="field"><label>Jenis tawaran</label><select id="productType"><option value="">— Pilih —</option><option>Produk fizikal</option><option>Produk digital</option><option>Perkhidmatan</option><option>Produk + Perkhidmatan</option><option>Kursus / Coaching / Membership</option><option>Makanan siap / Tempahan</option></select></div>
+<div class="field"><label>Nama produk / servis fokus</label><input id="productName"></div>
+<div class="field"><label>Harga jualan</label><input id="price"></div>
+<div class="field"><label>Saiz / isipadu / variasi</label><input id="size"></div>
 <div class="field full"><label>Ciri, bahan atau spesifikasi (fakta)</label><textarea id="features" placeholder="Saiz, bahan, fungsi, kandungan, packaging."></textarea></div>
-<div class="field full"><label>Manfaat yang boleh disokong</label><textarea id="benefits" placeholder="Bagaimana setiap ciri membantu pelanggan. Jangan masukkan janji yang belum disahkan.">Mengandungi vitamin C; membantu menyegarkan, melembapkan dan menjadikan bibir tidak kusam (maklumat diberikan pemilik; bukti belum diperiksa).</textarea></div>
-<div class="field full"><label>Bukti / dokumen / sijil (nyatakan jenis sebenar)</label><textarea id="proof" placeholder="Demonstrasi, label, spesifikasi, testimoni sah — jangan sekadar tulis 'KKM approved'.">Ada sijil / dokumen lain; jenis dokumen belum dikenal pasti.</textarea></div>
+<div class="field full"><label>Manfaat yang boleh disokong</label><textarea id="benefits" placeholder="Bagaimana setiap ciri membantu pelanggan. Jangan masukkan janji yang belum disahkan."></textarea></div>
+<div class="field full"><label>Bukti / dokumen / sijil (nyatakan jenis sebenar)</label><textarea id="proof" placeholder="Demonstrasi, label, spesifikasi, testimoni sah — jangan sekadar tulis 'KKM approved'."></textarea></div>
 <div class="field full"><label>Perbezaan / keunikan</label><textarea id="difference" placeholder="Apa yang membezakan produk daripada pilihan lain? Hanya fakta yang boleh disahkan."></textarea></div>
-<div class="field full"><label>Review pelanggan sebenar</label><textarea id="reviews" placeholder="Ringkasan review sebenar, dengan izin dan tanpa maklumat peribadi.">Ada review pelanggan; kandungan belum diberikan.</textarea></div>
-<div class="field"><label>Stok / kapasiti</label><input id="stock" value="200 unit"></div>
-<div class="field"><label>Tawaran / pakej sebenar</label><input id="offer" value="Free postage sempena 11.11"></div>
-<div class="field full"><label>Demo yang boleh ditunjukkan</label><textarea id="demo" placeholder="Tekstur, packaging, cara penggunaan, proses servis.">Tekstur serum/liquid, kotak, botol dan applicator.</textarea></div>
-<div class="field full"><label>Objection / soalan pelanggan yang biasa diterima</label><textarea id="objections" placeholder="Pisahkan dengan titik koma.">Harga mahal; Saya fikir dahulu; Apa beza dengan produk lain?; Sesuai untuk saya?; Boleh kurang lagi?; Boleh hilangkan bibir gelap?</textarea></div>
-<div class="field full"><label>Cara penggunaan / amaran label / polisi</label><textarea id="productExtra">Boleh digunakan bila-bila masa (maklumat diberikan pemilik).</textarea></div>
+<div class="field full"><label>Review pelanggan sebenar</label><textarea id="reviews" placeholder="Ringkasan review sebenar, dengan izin dan tanpa maklumat peribadi."></textarea></div>
+<div class="field"><label>Stok / kapasiti</label><input id="stock"></div>
+<div class="field"><label>Tawaran / pakej sebenar</label><input id="offer"></div>
+<div class="field full"><label>Demo yang boleh ditunjukkan</label><textarea id="demo" placeholder="Tekstur, packaging, cara penggunaan, proses servis."></textarea></div>
+<div class="field full"><label>Objection / soalan pelanggan yang biasa diterima</label><textarea id="objections" placeholder="Pisahkan dengan titik koma. Contoh: Harga mahal; Saya fikir dahulu; Sesuai untuk saya?"></textarea></div>
+<div class="field full"><label>Cara penggunaan / amaran label / polisi</label><textarea id="productExtra"></textarea></div>
 <div class="field full"><label>Maklumat PERLU SEMAK</label><textarea id="toVerify" placeholder="Senaraikan fakta yang belum disahkan: harga, sijil, dakwaan, stok, syarat promosi…"></textarea></div>
 </div>
 <div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Blueprint</button><button class="btn light" onclick="next('tools')">Pergi ke AI Prompt Cards →</button></div><div class="status sync"></div>
