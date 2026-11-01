@@ -12,8 +12,9 @@ import script from './modules/script.mjs';
 import objection from './modules/objection.mjs';
 import cta from './modules/cta.mjs';
 import rehearsal from './modules/rehearsal.mjs';
+import playbook from './modules/playbook.mjs';
 
-const MODULES = { reality, product, angles, rundown, dosdonts, script, objection, cta, rehearsal };
+const MODULES = { reality, product, angles, rundown, dosdonts, script, objection, cta, rehearsal, playbook };
 
 export const CARDS = [
   { id: 'reality', ref: '01 · Reality Check', name: 'LIVE Reality Check',
@@ -54,7 +55,7 @@ export const CARDS = [
     task: 'Bertindak sebagai pelanggan sasaran yang mempertimbangkan produk ini. Tanya satu soalan pada satu masa dan tunggu jawapan peserta. Selepas setiap jawapan, beri feedback (pemerhatian → kesan → cadangan) tentang kejelasan dan ketepatan. Selepas 3 pusingan, nilai dengan LIVE Practice Scorecard: 7 kriteria skor 1–5 (jumlah maksimum 35), satu kekuatan dan satu pembaikan.' },
   { id: 'playbook', ref: '10 · Final Playbook', name: 'Master LIVE Selling Playbook',
     title: "Panduan LIVE Lengkap (Master Playbook)",
-    short: "Gabungkan bahan yang telah disemak menjadi satu panduan LIVE. Tandakan maklumat yang masih perlu disahkan.",
+    short: "AI gabungkan semua bahan yang anda luluskan menjadi satu panduan LIVE lengkap. Semak, edit dan luluskan.",
     task: "Gabungkan menjadi LIVE Selling Playbook lengkap: Product Selling Blueprint; LIVE Rundown 60 Minit; Do's & Don'ts Checklist; 3 Opening Hooks dan skrip lengkap; Product Demonstration Guide; Engagement & Objection Response Bank; CTA, Checkout & Follow-up; Practice Scorecard dan Action Plan. Akhiri dengan Final Quality Check (lengkap / perlu semakan) dan My Next LIVE Commitment. Tandakan semua perkara PERLU SEMAK." },
 ];
 
@@ -112,11 +113,11 @@ export function profileText(d) {
   return lines.join('\n');
 }
 
-/** Approved outputs from earlier cards, for the Master Playbook. */
+/** Approved outputs from Seksyen 01–09, for the Master Playbook; sections not approved yet are marked [BELUM LENGKAP]. */
 export function approvedText(approvals, exceptId) {
-  const done = CARDS.filter((c) => c.id !== exceptId && approvals?.[c.id]?.text);
-  if (!done.length) return '';
-  return done.map((c) => `--- ${c.name} ---\n${approvals[c.id].text}`).join('\n\n');
+  const sections = CARDS.map((c, i) => ({ c, n: String(i + 1).padStart(2, '0') })).filter(({ c }) => c.id !== exceptId);
+  if (!sections.some(({ c }) => approvals?.[c.id]?.text)) return '';
+  return sections.map(({ c, n }) => `--- Seksyen ${n} · ${c.title} ---\n${approvals?.[c.id]?.text || '[BELUM LENGKAP] Belum diluluskan oleh peserta.'}`).join('\n\n');
 }
 
 export const RULES = `PERATURAN WAJIB:

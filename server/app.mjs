@@ -100,6 +100,24 @@ export function createApp({ store, writer, aiLimitPerIpHour = 30, now = Date.now
     res.json({ text: out.text, source: out.source, reason: out.reason || '' });
   }));
 
+  // Card 10: Claude writes the Master Playbook from the answers and approved outputs; otherwise the participant gets the ChatGPT prompt.
+  app.post('/api/playbook', wrap(async (req, res) => {
+    const data = cleanData(req.body?.data);
+    const approvals = cleanApprovals(req.body?.approvals);
+    const participantId = normId(req.body?.participantId);
+    const card = cardById('playbook');
+    const out = writer.enabled && !allowAi(req.ip)
+      ? { prompt: templatePrompt(card, data, approvals), source: 'template', reason: 'Had penggunaan AI sejam dicapai' }
+      : await writer.playbook({ data, approvals });
+    store.logPrompt({
+      participantId, businessName: data.businessName || '', productName: data.productName || '',
+      module: out.text ? 'Master Playbook (dijana AI)' : card.name, // only a prompt goes in the report's prompt appendix
+      source: out.source, model: out.model || '', inputTokens: out.usage?.input_tokens ?? '', outputTokens: out.usage?.output_tokens ?? '',
+      note: out.reason || '', prompt: out.text || out.prompt,
+    }).catch((e) => log.error?.(`[log] ${e.message}`));
+    res.json(out.text ? { text: out.text, source: out.source } : { prompt: out.prompt, source: out.source, reason: out.reason || '' });
+  }));
+
   // The full report: built from what's saved, downloaded by the participant, and kept in Drive with its link in the Sheet.
   app.post('/api/report', wrap(async (req, res) => {
     const participantId = normId(req.body?.participantId);

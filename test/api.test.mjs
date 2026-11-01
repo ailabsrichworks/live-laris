@@ -13,6 +13,7 @@ async function start({ writer, limit = 30 } = {}) {
     enabled: true,
     async write({ card, data, approvals }) { calls.push({ card, data, approvals }); return { prompt: `AI PROMPT ${card.id}`, source: 'ai', model: 'claude-sonnet-5-5', usage: { input_tokens: 10, output_tokens: 5 } } },
     async summarize({ data }) { calls.push({ summary: data }); return { text: `Saya menjalankan ${data.businessName}.`, source: 'ai', model: 'claude-sonnet-5-5', usage: { input_tokens: 4, output_tokens: 2 } } },
+    async playbook({ data, approvals }) { calls.push({ playbook: { data, approvals } }); return { text: `PLAYBOOK ${data.businessName}`, source: 'ai', model: 'claude-sonnet-5-5', usage: { input_tokens: 8, output_tokens: 6 } } },
   };
   const server = createApp({ store, writer, aiLimitPerIpHour: limit, log: quiet }).listen(0);
   await new Promise((r) => server.once('listening', r));
@@ -81,6 +82,23 @@ test('with the AI off, the template prompt is returned', async (t) => {
   const r = (await s.req('/api/prompt', { card: 'reality', data: {} })).body;
   assert.equal(r.source, 'template');
   assert.match(r.prompt, /^# MODUL 01 – KENAL PASTI MASALAH LIVE ANDA/, 'the module is the template');
+});
+
+test('the Master Playbook is written by the AI and logged outside the prompt appendix; over the limit it is a prompt', async (t) => {
+  const s = await start({ limit: 1 }); t.after(s.close);
+  const r = (await s.req('/api/playbook', { data: { businessName: 'Sambal Mak Long' }, approvals: { script: { text: 'SKRIP' }, evil: { text: 'x' } } })).body;
+  assert.deepEqual(r, { text: 'PLAYBOOK Sambal Mak Long', source: 'ai' });
+  assert.deepEqual(s.calls[0].playbook.approvals, { script: { text: 'SKRIP' } });
+  await new Promise((res) => setImmediate(res));
+  assert.equal(s.store.log[0].module, 'Master Playbook (dijana AI)');
+  assert.equal(s.store.log[0].prompt, 'PLAYBOOK Sambal Mak Long');
+
+  const over = (await s.req('/api/playbook', { data: { businessName: 'Sambal Mak Long' }, approvals: { script: { text: 'SKRIP' } } })).body;
+  assert.equal(over.source, 'template');
+  assert.equal(over.reason, 'Had penggunaan AI sejam dicapai');
+  assert.match(over.prompt, /^# SECTION 10 — PANDUAN LIVE LENGKAP[\s\S]*SKRIP/);
+  await new Promise((res) => setImmediate(res));
+  assert.equal(s.store.log[1].module, 'Master LIVE Selling Playbook');
 });
 
 test('writes the business summary with the AI and logs it', async (t) => {

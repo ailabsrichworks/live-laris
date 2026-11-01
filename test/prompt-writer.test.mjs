@@ -35,10 +35,23 @@ test('asks Claude Sonnet with a cached system prompt and returns its prompt', as
   assert.doesNotMatch(msg, /SKRIP/, 'approved outputs go only to the Master Playbook');
 });
 
-test('the Master Playbook card includes approved outputs', async () => {
-  const client = fakeClient({ stop_reason: 'end_turn', content: [{ type: 'text', text: longPrompt }] });
-  await promptWriter({ client, model: 'm', log: quiet }).write({ card: cardById('playbook'), data, approvals: { script: { text: 'SKRIP' } } });
-  assert.match(client.calls[0].messages[0].content, /<output_diluluskan>[\s\S]*--- Script Builder H\.E\.B\.A\.T ---\nSKRIP/);
+test('Claude writes the Master Playbook itself from module 10 and the approved outputs, marking missing sections', async () => {
+  const playbookText = '## A. Ringkasan LIVE\n' + 'Isi playbook. '.repeat(40);
+  const client = fakeClient({ stop_reason: 'end_turn', model: 'm', content: [{ type: 'text', text: playbookText }], usage: { input_tokens: 9, output_tokens: 9 } });
+  const out = await promptWriter({ client, model: 'm', log: quiet }).playbook({ data, approvals: { script: { text: 'SKRIP' } } });
+  assert.deepEqual([out.source, out.text], ['ai', playbookText.trim()]);
+  const p = client.calls[0];
+  assert.ok(p.system[0].text.includes(cardById('playbook').module), 'the trainer module is the instruction');
+  assert.match(p.messages[0].content, /--- Seksyen 06 · Bina Skrip LIVE \(H\.E\.B\.A\.T\.\) ---\nSKRIP/);
+  assert.match(p.messages[0].content, /--- Seksyen 01 · [^\n]+ ---\n\[BELUM LENGKAP\]/);
+  assert.doesNotMatch(p.messages[0].content, /Seksyen 10/);
+
+  for (const w of [promptWriter({ model: 'm', log: quiet }), promptWriter({ client: fakeClient({ stop_reason: 'max_tokens', content: [] }), model: 'm', log: quiet })]) {
+    const fb = await w.playbook({ data, approvals: { script: { text: 'SKRIP' } } });
+    assert.equal(fb.source, 'template');
+    assert.ok(fb.prompt.startsWith(cardById('playbook').module), 'without Claude, the participant gets the ChatGPT prompt');
+    assert.match(fb.prompt, /## OUTPUT YANG TELAH DILULUSKAN PESERTA[\s\S]*SKRIP/);
+  }
 });
 
 test('the business summary uses only the step 1 answers, at low effort, with a fallback', async () => {
@@ -81,7 +94,7 @@ test('falls back to the template prompt when Claude is off, refuses, fails or an
 
 test("a card with the trainer's module sends the whole module to Claude, and the template keeps it word for word", async () => {
   const { CARDS, templatePrompt } = await import('../public/js/cards.mjs');
-  assert.deepEqual(CARDS.filter((c) => c.module).map((c) => c.id), ['reality', 'product', 'angles', 'rundown', 'dosdonts', 'script', 'objection', 'cta', 'rehearsal']);
+  assert.deepEqual(CARDS.filter((c) => c.module).map((c) => c.id), ['reality', 'product', 'angles', 'rundown', 'dosdonts', 'script', 'objection', 'cta', 'rehearsal', 'playbook']);
   const card = cardById('reality');
   const client = fakeClient({ stop_reason: 'end_turn', model: 'm', content: [{ type: 'text', text: longPrompt }], usage: {} });
   await promptWriter({ client, model: 'm', log: quiet }).write({ card, data, approvals: {} });
@@ -92,5 +105,4 @@ test("a card with the trainer's module sends the whole module to Claude, and the
   const t = templatePrompt(card, data, {});
   assert.ok(t.startsWith(card.module));
   assert.match(t, /## MAKLUMAT PESERTA[\s\S]*Produk fokus: Lips Serum/);
-  assert.doesNotMatch(templatePrompt(cardById('playbook'), data, {}), /<modul>|## MAKLUMAT PESERTA/, 'cards without a module keep the old template');
 });

@@ -148,7 +148,8 @@ function setGenerating(on) {
 async function makePrompt(idOrName) {
   if (generating) return;
   const card = CARDS.find((c) => c.id === idOrName || c.name === idOrName) || CARDS[CARDS.length - 1];
-  currentCard = card;
+  if (card.id === 'playbook') return makePlaybook(card);
+  currentCard = card; playbookWritten = false;
   next('playbook');
   setGenerating(true);
   $('promptBox').classList.add('loading');
@@ -170,6 +171,43 @@ async function makePrompt(idOrName) {
   } catch (err) {
     $('promptBox').classList.remove('loading');
     $('promptBox').textContent = 'Gagal menjana prompt: ' + err.message + '. Cuba klik kad sekali lagi.';
+  } finally { setGenerating(false) }
+}
+// Card 10: the AI writes the playbook itself from the approved outputs; it lands in the answer box to check, edit and approve.
+// If the AI can't, the participant gets the ChatGPT prompt instead, like the other cards.
+let playbookWritten = false;
+async function makePlaybook(card) {
+  currentCard = card; playbookWritten = false;
+  next('playbook');
+  setGenerating(true);
+  $('promptBox').classList.add('loading');
+  $('promptBox').innerHTML = '<span class="spinner" aria-hidden="true"></span><span></span>';
+  $('promptBox').lastChild.textContent = 'AI sedang menyusun Master Playbook daripada semua bahan yang anda luluskan… (1–3 minit)';
+  $('promptSource').textContent = ''; $('promptSource').className = 'source'; $('copyStatus').textContent = '';
+  $('approveLabel').textContent = 'Master Playbook anda';
+  await saveProfile(true);
+  try {
+    const r = await api('/api/playbook', { participantId, data: collect(), approvals });
+    $('promptBox').classList.remove('loading');
+    $('promptSource').innerHTML = (r.text ? ICON.sparkle : ICON.info) + '<span></span>';
+    if (r.text) {
+      playbookWritten = true;
+      $('promptSource').className = 'source ai';
+      $('promptSource').lastChild.textContent = 'Master Playbook disusun oleh AI daripada bahan yang anda luluskan.';
+      $('promptBox').textContent = 'Master Playbook anda sudah siap di bawah. Semak dan edit jika perlu, kemudian klik Lulus & Simpan supaya ia masuk ke laporan penuh.';
+      $('aiOutput').value = r.text;
+      const el = $('aiOutput'); el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight + 4, window.innerHeight * 0.7) + 'px';
+      $('copyStatus').textContent = 'Master Playbook siap. Semak di bawah.';
+      el.scrollIntoView({ block: 'start' });
+    } else {
+      $('promptSource').lastChild.textContent = 'AI tidak dapat menyusun playbook sekarang' + (r.reason ? ' (' + r.reason + ')' : '') + '. Salin arahan ini ke ChatGPT dan tampal jawapannya di bawah.';
+      $('promptBox').textContent = r.prompt;
+      $('aiOutput').value = approvals.playbook?.text || '';
+      $('copyStatus').textContent = 'Arahan Master Playbook sudah siap. Klik Salin Prompt.';
+    }
+  } catch (err) {
+    $('promptBox').classList.remove('loading');
+    $('promptBox').textContent = 'Gagal menyusun Master Playbook: ' + err.message + '. Cuba klik sekali lagi.';
   } finally { setGenerating(false) }
 }
 async function approveOutput() {
@@ -204,7 +242,7 @@ function showAnswer(el, raw) {
   }
 }
 function renderModules() {
-  $('moduleGrid').innerHTML = CARDS.map((c, i) => `<article class="module">${approvals[c.id] ? `<span class="badge">${ICON.check}Diluluskan</span>` : ''}<div class="ref">${c.ref.toUpperCase()}</div><h3>${String(i + 1).padStart(2, '0')} · ${c.title}</h3><p>${c.short}</p><button class="btn gen-btn ${c.id === 'playbook' ? 'red' : 'light'}" onclick="makePrompt('${c.id}')"${generating ? ' disabled' : ''}>Sediakan Arahan ChatGPT ${ICON.arrow}</button></article>`).join('');
+  $('moduleGrid').innerHTML = CARDS.map((c, i) => `<article class="module">${approvals[c.id] ? `<span class="badge">${ICON.check}Diluluskan</span>` : ''}<div class="ref">${c.ref.toUpperCase()}</div><h3>${String(i + 1).padStart(2, '0')} · ${c.title}</h3><p>${c.short}</p><button class="btn gen-btn ${c.id === 'playbook' ? 'red' : 'light'}" onclick="makePrompt('${c.id}')"${generating ? ' disabled' : ''}>${c.id === 'playbook' ? 'Cipta Master Playbook' : 'Sediakan Arahan ChatGPT'} ${ICON.arrow}</button></article>`).join('');
 }
 
 // Progress: answered fields per step, approved cards for the AI step.
@@ -274,7 +312,9 @@ async function downloadReport() {
   } finally { reporting = false; updateProgress() }
 }
 
-function copyPrompt() { copyText($('promptBox').textContent).then(() => ($('copyStatus').textContent = '✓ Prompt disalin. Tampal ke ChatGPT.')).catch(() => ($('copyStatus').textContent = 'Pilih dan salin teks prompt secara manual.')) }
+function copyPrompt() {
+  if (playbookWritten) { copyText($('aiOutput').value).then(() => ($('copyStatus').textContent = '✓ Master Playbook disalin.')).catch(() => ($('copyStatus').textContent = 'Pilih dan salin teks playbook secara manual.')); return }
+  copyText($('promptBox').textContent).then(() => ($('copyStatus').textContent = '✓ Prompt disalin. Tampal ke ChatGPT.')).catch(() => ($('copyStatus').textContent = 'Pilih dan salin teks prompt secara manual.')) }
 function downloadProfile() { const blob = new Blob([profileText(collect())], { type: 'text/plain;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'LIVE-LARIS-Profil-Peserta.txt'; a.click(); URL.revokeObjectURL(a.href) }
 function openChatGPT() { window.open('https://chatgpt.com/', '_blank', 'noopener') }
 let currentStep = 'business';
