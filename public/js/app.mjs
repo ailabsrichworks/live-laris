@@ -38,9 +38,9 @@ function saveProfile(silent) {
   store.set(CACHE_KEY, JSON.stringify(data));
   if (saving) return saving.then(() => saveProfile(silent));
   document.querySelectorAll('.btn.save').forEach((b) => (b.disabled = true));
-  setStatus('Menyimpan ke Google Sheet…');
+  setStatus(''); // saving is silent; only a failure is shown
   saving = api('/api/profile', { participantId, data })
-    .then((r) => { setPid(r.participantId); setStatus('✓ Disimpan ke Google Sheet · ' + r.updatedAt, 'ok') })
+    .then((r) => setPid(r.participantId))
     .catch((err) => { setStatus('✗ Gagal simpan (' + err.message + '). Data masih ada dalam browser ini — cuba lagi.', 'err'); if (silent !== true) alert('Gagal menyimpan. Sila semak sambungan internet dan cuba lagi.') })
     .finally(() => { saving = null; document.querySelectorAll('.btn.save').forEach((b) => (b.disabled = false)) });
   return saving;
@@ -321,5 +321,5 @@ document.addEventListener('click', (e) => {
 // Autosave a few seconds after the participant changes any field
 fields().forEach((e) => {
   e.addEventListener('input', () => { updateProgress(); if (e.getAttribute('aria-invalid') === 'true' && e.value.trim()) markField(e.id, false) });
-  e.addEventListener('change', () => { updateProgress(); clearTimeout(autoTimer); setStatus('Perubahan belum disimpan…'); autoTimer = setTimeout(() => saveProfile(true), 3000) });
+  e.addEventListener('change', () => { updateProgress(); clearTimeout(autoTimer); autoTimer = setTimeout(() => saveProfile(true), 3000) });
 });
