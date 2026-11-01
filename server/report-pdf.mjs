@@ -4,7 +4,7 @@
 import PDFDocument from 'pdfkit';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { CARDS, QC_ITEMS, LEAKS, LEAK_LABELS, METRICS } from '../public/js/cards.mjs';
+import { CARDS, QC_ITEMS, LEAKS, LEAK_LABELS } from '../public/js/cards.mjs';
 import { parseBlocks } from '../public/js/richtext.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -29,7 +29,7 @@ const SECTIONS = [
     ['reviews', 'Kata pelanggan'], ['stock', 'Stok / tempahan'], ['offer', 'Promosi'], ['demo', 'Yang boleh ditunjuk semasa LIVE'],
     ['objections', 'Soalan / keraguan pelanggan'], ['productExtra', 'Maklumat penting lain'], ['toVerify', 'Maklumat PERLU SEMAK']]],
 ];
-const AFTER_LEAKS = [['improveOne', 'Satu perkara paling penting untuk diperbaiki'], ['goal', 'Apa yang mahu dicapai melalui LIVE'], ['liveExtra', 'Cara buat LIVE']];
+const AFTER_LEAKS = [['goal', 'Apa yang mahu dicapai melalui LIVE'], ['liveExtra', 'Cara buat LIVE']];
 const PLAN = [['nextLiveAt', 'Bila LIVE seterusnya'], ['nextProduct', 'Produk untuk dijual'], ['nextChange', 'Satu perkara untuk dicuba / dibaiki'],
   ['nextMetric', 'Apa yang akan dikira / dicatat'], ['reviewDate', 'Bila semak hasil'], ['commitNotes', 'Perlu disediakan']];
 const NOTE = 'Penafian AI: Prompt dan output AI adalah draf awal berasaskan input peserta. Semak semua fakta, harga dan dakwaan sebelum digunakan; hasil jualan tidak dijamin.';
@@ -169,8 +169,6 @@ export function reportPdf({ participantId, data = {}, approvals = {}, prompts = 
         doc.y = Math.max(doc.y, y + 14) + 2;
       });
       doc.y += 5;
-      const metrics = Object.entries(METRICS).filter(([k]) => clean(data[k])).map(([, v]) => v);
-      field('Metrik yang akan direkod', metrics.join(', '));
       AFTER_LEAKS.forEach(([k, l]) => field(l, data[k]));
     }
   });

@@ -67,18 +67,14 @@ export const LEAK_LABELS = {
   Confidence: 'Penonton belum yakin', Action: 'Penonton tak jadi beli',
 };
 
-export const METRICS = {
-  mAttention: 'Attention', mEngagement: 'Engagement', mIntent: 'Intent', mConversion: 'Conversion', mFollowup: 'Follow-up',
-};
-
-// Form field → label used when the profile is shown to the AI. Leak, metric and checklist fields are summarised separately.
+// Form field → label used when the profile is shown to the AI. Leak and checklist fields are summarised separately.
 export const LABELS = {
   owner: 'Nama pemilik', businessName: 'Nama bisnes', years: 'Tempoh operasi', model: 'Model bisnes', industry: 'Industri',
   team: 'Saiz team', location: 'Lokasi', sales: 'Jualan bulanan', customer: 'Pelanggan sasaran', age: 'Umur pelanggan',
   customerNeed: 'Situasi/masalah pelanggan', businessDesc: 'Penerangan bisnes',
   platform: 'Platform LIVE', experience: 'Pengalaman LIVE', liveCount30: 'Kekerapan LIVE (30 hari)', liveDuration: 'Purata tempoh LIVE',
   viewersEnter: 'Apa berlaku apabila viewers masuk', commonQuestions: 'Soalan paling kerap', checkout: 'Cara pelanggan membeli',
-  improveOne: 'Satu perkara untuk diperbaiki', goal: 'Matlamat LIVE', liveExtra: 'Nota operasi LIVE',
+  goal: 'Matlamat LIVE', liveExtra: 'Nota operasi LIVE',
   productType: 'Jenis tawaran', productName: 'Produk fokus', price: 'Harga', size: 'Saiz/variasi', features: 'Ciri/bahan/spesifikasi',
   benefits: 'Manfaat boleh disokong', proof: 'Bukti/dokumen', difference: 'Perbezaan', reviews: 'Review', stock: 'Stok/kapasiti',
   offer: 'Tawaran/pakej', demo: 'Demo', objections: 'Objection pelanggan', productExtra: 'Cara guna/amaran/polisi', toVerify: 'PERLU SEMAK',
@@ -96,9 +92,7 @@ export function profileText(d) {
     const sign = v(d, `leak${n}Sign`); // only on profiles saved before the sign boxes were removed
     return `${LEAK_LABELS[n]} (${n}) ${v(d, `leak${n}`) || '-'}${sign ? ` (${sign})` : ''}`;
   }).join('; ');
-  lines.splice(lines.findIndex((l) => l.startsWith('Satu perkara')), 0, `Masalah semasa LIVE (skor 1 = tiada masalah, 5 = sangat serius): ${leaks}`);
-  const metrics = Object.entries(METRICS).filter(([k]) => v(d, k)).map(([, n]) => n);
-  lines.push(`Metrik dipilih: ${metrics.join(', ') || '[Belum dipilih]'}`);
+  lines.splice(lines.findIndex((l) => l.startsWith('Matlamat LIVE')), 0, `Masalah semasa LIVE (skor 1 = tiada masalah, 5 = sangat serius): ${leaks}`);
   lines.push(`Final Quality Check: ${QC_ITEMS.map((q, i) => (v(d, `qc${i}`) ? '✓ ' : '☐ ') + q).join(' | ')}`);
   return lines.join('\n');
 }
