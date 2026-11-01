@@ -32,3 +32,11 @@ test('the report PDF builds with long, wide and multi-page tables', async () => 
   assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
   assert.ok((pdf.toString('latin1').match(/\/Type \/Page[^s]/g) || []).length >= 3);
 });
+
+test('the report is a cover with contents plus four parts, each starting on its own page, and markdown quirks still build', async () => {
+  const pages = (b) => (b.toString('latin1').match(/\/Type \/Page[^s]/g) || []).length;
+  const quirks = '# Tajuk\n> Nota `kod` *italik*\n---\n- [ ] belum\n- [x] siap → terus ✓ ✗ ≥ ☐\n| A | B |\n|---|---|\n| ✓ | [PERLU SEMAK] |';
+  const pdf = await reportPdf({ participantId: 'LL-AAAAAAAA', data: { businessName: 'Ujian' }, approvals: { playbook: { text: quirks } } });
+  assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
+  assert.equal(pages(pdf), 5);
+});
