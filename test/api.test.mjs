@@ -86,14 +86,21 @@ test('with the AI off, the template prompt is returned', async (t) => {
 
 test('the Master Playbook is written by the AI and logged outside the prompt appendix; over the limit it is a prompt', async (t) => {
   const s = await start({ limit: 1 }); t.after(s.close);
-  const r = (await s.req('/api/playbook', { data: { businessName: 'Sambal Mak Long' }, approvals: { script: { text: 'SKRIP' }, evil: { text: 'x' } } })).body;
+  const all = Object.fromEntries(['reality', 'product', 'angles', 'rundown', 'dosdonts', 'objection', 'cta', 'rehearsal'].map((id) => [id, { text: id.toUpperCase() }]));
+  const notYet = await s.req('/api/playbook', { data: { businessName: 'Sambal Mak Long' }, approvals: all });
+  assert.equal(notYet.status, 409, 'every card 01–09 needs an approved output first');
+  assert.match(notYet.body.error, /Belum lulus: Bina Skrip LIVE \(H\.E\.B\.A\.T\.\)\.$/);
+  assert.equal(s.calls.length, 0, 'no AI call');
+
+  all.script = { text: 'SKRIP' };
+  const r = (await s.req('/api/playbook', { data: { businessName: 'Sambal Mak Long' }, approvals: { ...all, evil: { text: 'x' } } })).body;
   assert.deepEqual(r, { text: 'PLAYBOOK Sambal Mak Long', source: 'ai' });
-  assert.deepEqual(s.calls[0].playbook.approvals, { script: { text: 'SKRIP' } });
+  assert.deepEqual(s.calls[0].playbook.approvals, all);
   await new Promise((res) => setImmediate(res));
   assert.equal(s.store.log[0].module, 'Master Playbook (dijana AI)');
   assert.equal(s.store.log[0].prompt, 'PLAYBOOK Sambal Mak Long');
 
-  const over = (await s.req('/api/playbook', { data: { businessName: 'Sambal Mak Long' }, approvals: { script: { text: 'SKRIP' } } })).body;
+  const over = (await s.req('/api/playbook', { data: { businessName: 'Sambal Mak Long' }, approvals: all })).body;
   assert.equal(over.source, 'template');
   assert.equal(over.reason, 'Had penggunaan AI sejam dicapai');
   assert.match(over.prompt, /^# SECTION 10 — PANDUAN LIVE LENGKAP[\s\S]*SKRIP/);

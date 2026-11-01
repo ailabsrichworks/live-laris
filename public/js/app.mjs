@@ -142,7 +142,7 @@ function legacyCopy(t) {
 // While the AI is writing, every "Jana prompt" button is locked: each click is a paid AI call.
 function setGenerating(on) {
   generating = on;
-  document.querySelectorAll('.gen-btn').forEach((b) => (b.disabled = on));
+  document.querySelectorAll('.gen-btn').forEach((b) => (b.disabled = on || ('playbook' in b.dataset && !playbookReady())));
   $('promptBox').setAttribute('aria-busy', on ? 'true' : 'false');
 }
 async function makePrompt(idOrName) {
@@ -176,7 +176,17 @@ async function makePrompt(idOrName) {
 // Card 10: the AI writes the playbook itself from the approved outputs; it lands in the answer box to check, edit and approve.
 // If the AI can't, the participant gets the ChatGPT prompt instead, like the other cards.
 let playbookWritten = false;
+// The playbook is only built once every card 01–09 has an approved output.
+const SOURCE_CARDS = CARDS.filter((c) => c.id !== 'playbook');
+const approvedSources = () => SOURCE_CARDS.filter((c) => approvals[c.id]).length;
+const playbookReady = () => approvedSources() === SOURCE_CARDS.length;
+const playbookHint = () => (playbookReady() ? '' : `Luluskan semua ${SOURCE_CARDS.length} bahan (01–${String(SOURCE_CARDS.length).padStart(2, '0')}) dahulu untuk cipta Master Playbook · ${approvedSources()} / ${SOURCE_CARDS.length} lulus.`);
+function refreshPlaybookButtons() {
+  document.querySelectorAll('[data-playbook]').forEach((b) => (b.disabled = generating || !playbookReady()));
+  document.querySelectorAll('.playbook-hint').forEach((p) => (p.textContent = playbookHint()));
+}
 async function makePlaybook(card) {
+  if (!playbookReady()) { alert(playbookHint()); return }
   currentCard = card; playbookWritten = false;
   next('playbook');
   setGenerating(true);
@@ -242,7 +252,9 @@ function showAnswer(el, raw) {
   }
 }
 function renderModules() {
-  $('moduleGrid').innerHTML = CARDS.map((c, i) => `<article class="module">${approvals[c.id] ? `<span class="badge">${ICON.check}Diluluskan</span>` : ''}<div class="ref">${c.ref.toUpperCase()}</div><h3>${String(i + 1).padStart(2, '0')} · ${c.title}</h3><p>${c.short}</p><button class="btn gen-btn ${c.id === 'playbook' ? 'red' : 'light'}" onclick="makePrompt('${c.id}')"${generating ? ' disabled' : ''}>${c.id === 'playbook' ? 'Cipta Master Playbook' : 'Sediakan Arahan ChatGPT'} ${ICON.arrow}</button></article>`).join('');
+  $('moduleGrid').innerHTML = CARDS.map((c, i) => `<article class="module">${approvals[c.id] ? `<span class="badge">${ICON.check}Diluluskan</span>` : ''}<div class="ref">${c.ref.toUpperCase()}</div><h3>${String(i + 1).padStart(2, '0')} · ${c.title}</h3><p>${c.short}</p>${c.id === 'playbook'
+    ? `<button class="btn gen-btn red" data-playbook onclick="makePrompt('playbook')"${generating || !playbookReady() ? ' disabled' : ''}>Cipta Master Playbook ${ICON.arrow}</button><p class="help playbook-hint">${playbookHint()}</p>`
+    : `<button class="btn gen-btn light" onclick="makePrompt('${c.id}')"${generating ? ' disabled' : ''}>Sediakan Arahan ChatGPT ${ICON.arrow}</button>`}</article>`).join('');
 }
 
 // Progress: answered fields per step, approved cards for the AI step.
@@ -266,6 +278,7 @@ function updateProgress() {
   const approved = CARDS.filter((c) => approvals[c.id]).length;
   done += approved; total += CARDS.length;
   setStep('tools', approved, CARDS.length, `${approved}/${CARDS.length} lulus`);
+  refreshPlaybookButtons();
   // "Kemajuan semakan" in step 6
   const qcDone = QC_ITEMS.filter((_, i) => $('qc' + i)?.checked).length;
   $('qcCount').textContent = `${qcDone} / ${QC_ITEMS.length} siap`;

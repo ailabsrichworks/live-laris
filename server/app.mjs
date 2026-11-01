@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
-import { cardById, templatePrompt } from '../public/js/cards.mjs';
+import { CARDS, cardById, templatePrompt } from '../public/js/cards.mjs';
 import { templateSummary } from './prompt-writer.mjs';
 import { reportPdf, reportMissing, reportFileName } from './report-pdf.mjs';
 
@@ -106,6 +106,8 @@ export function createApp({ store, writer, aiLimitPerIpHour = 30, now = Date.now
     const approvals = cleanApprovals(req.body?.approvals);
     const participantId = normId(req.body?.participantId);
     const card = cardById('playbook');
+    const missing = CARDS.filter((c) => c.id !== 'playbook' && !approvals[c.id]);
+    if (missing.length) throw fail(409, `Luluskan semua bahan 01–09 dahulu. Belum lulus: ${missing.map((c) => c.title).join(', ')}.`);
     const out = writer.enabled && !allowAi(req.ip)
       ? { prompt: templatePrompt(card, data, approvals), source: 'template', reason: 'Had penggunaan AI sejam dicapai' }
       : await writer.playbook({ data, approvals });
