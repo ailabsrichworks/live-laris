@@ -117,3 +117,16 @@ test('saves the report PDF to the Drive folder, replaces the previous one and li
   assert.equal(sh.g[1][col('Laporan disimpan')], '2026-10-31 18:00:00');
   assert.equal(gs.call('saveReport', { participantId: 'LL-AAAAAAAA', base64: pdf }).ok, false);
 });
+
+test('returns each participant’s latest prompt per card from the Prompt Log', () => {
+  const gs = loadAppsScript();
+  const id = gs.call('saveProfile', { data: { businessName: 'A' } }).result.participantId;
+  const other = gs.call('saveProfile', { data: { businessName: 'B' } }).result.participantId;
+  gs.call('logPrompt', { entry: { participantId: id, module: 'LIVE Rundown', prompt: 'RUNDOWN V1' } });
+  gs.call('logPrompt', { entry: { participantId: id, module: 'LIVE Rundown', prompt: 'RUNDOWN V2' } });
+  gs.call('logPrompt', { entry: { participantId: id, module: 'CTA & Follow-up', prompt: '=CTA' } });
+  gs.call('logPrompt', { entry: { participantId: other, module: 'LIVE Rundown', prompt: 'NOT MINE' } });
+  const out = gs.call('getPrompts', { participantId: id }).result;
+  assert.deepEqual(Object.fromEntries(Object.entries(out).map(([k, v]) => [k, v.prompt])), { 'LIVE Rundown': 'RUNDOWN V2', 'CTA & Follow-up': '=CTA' });
+  assert.deepEqual(gs.call('getPrompts', { participantId: 'nope' }).result, {});
+});

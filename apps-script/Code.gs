@@ -119,6 +119,7 @@ function handle_(req) {
     case 'saveApproval': return saveApproval_(req.participantId, req.cardId, req.text);
     case 'logPrompt': return logPrompt_(req.entry);
     case 'saveReport': return saveReport_(req.participantId, req.base64, req.name);
+    case 'getPrompts': return getPrompts_(req.participantId);
   }
   throw new Error('Unknown op: ' + req.op);
 }
@@ -185,6 +186,23 @@ function saveReport_(participantId, base64, name) {
     return { fileId: file.getId(), link: file.getUrl(), at: now };
   });
   if (!out) throw new Error('Profil tidak dijumpai');
+  return out;
+}
+
+/** The participant's latest prompt per card (module name → { prompt, at }), from the Prompt Log. */
+function getPrompts_(participantId) {
+  const id = normaliseId_(participantId);
+  if (!id) return {};
+  const sh = logSheet_(PROMPT_SHEET, PROMPT_HEADERS);
+  if (sh.getLastRow() < 2) return {};
+  const headers = headers_(sh);
+  const col = (h) => headers.indexOf(h);
+  const rows = sh.getRange(2, 1, sh.getLastRow() - 1, headers.length).getDisplayValues();
+  const out = {};
+  rows.forEach(r => {
+    if (r[col('participantId')] !== id || !r[col('prompt')]) return;
+    out[r[col('module')]] = { prompt: r[col('prompt')], at: r[col('timestamp')] }; // later rows win
+  });
   return out;
 }
 

@@ -109,7 +109,13 @@ export function createApp({ store, writer, aiLimitPerIpHour = 30, now = Date.now
     if (!p) throw fail(404, 'Profil tidak dijumpai.');
     const missing = reportMissing(p.data, p.approvals);
     if (missing.length) throw fail(409, `Laporan belum boleh disediakan: ${missing.join('; ')}.`);
-    const pdf = await reportPdf({ participantId, data: p.data, approvals: p.approvals });
+    let prompts = {};
+    try {
+      prompts = (await store.getPrompts(participantId)) || {};
+    } catch (e) {
+      log.error?.(`[report] prompts for ${participantId} unavailable: ${e.message}`); // report goes out without the appendix
+    }
+    const pdf = await reportPdf({ participantId, data: p.data, approvals: p.approvals, prompts });
     const name = reportFileName(p.data, participantId);
     let saved = false;
     try {

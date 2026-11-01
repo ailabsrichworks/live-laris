@@ -34,6 +34,7 @@ export function appsScriptStore({ url, secret, fetchImpl = fetch, timeoutMs = 60
     saveApproval: (participantId, cardId, text) => rpc('saveApproval', { participantId, cardId, text }),
     logPrompt: (entry) => rpc('logPrompt', { entry }),
     saveReport: (participantId, base64, name) => rpc('saveReport', { participantId, base64, name }),
+    getPrompts: (participantId) => rpc('getPrompts', { participantId }),
   };
 }
 
@@ -77,5 +78,10 @@ export function memoryStore() {
       return { at };
     },
     async logPrompt(entry) { log.push({ ...entry, at: stamp() }); return true },
+    async getPrompts(id) {
+      const out = {};
+      log.filter((e) => e.participantId === id && e.prompt).forEach((e) => { out[e.module] = { prompt: e.prompt, at: e.at } });
+      return out;
+    },
   };
 }

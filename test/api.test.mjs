@@ -145,3 +145,21 @@ test('if the Drive copy fails, the participant still gets the PDF', async (t) =>
   assert.equal(res.status, 200);
   assert.equal(res.headers.get('x-report-saved'), '0');
 });
+
+test('the report includes the prompts we gave for approved cards, and still works without them', async (t) => {
+  const s = await start(); t.after(s.close);
+  const { participantId } = (await s.req('/api/profile', { data: FULL })).body;
+  await s.req('/api/prompt', { participantId, card: 'rundown', data: FULL }); // logs "AI PROMPT rundown"
+  await new Promise((r) => setImmediate(r));
+  await s.req('/api/approve', { participantId, card: 'rundown', text: 'RUNDOWN' });
+  await s.req('/api/approve', { participantId, card: 'playbook', text: 'Panduan' });
+  const pages = async () => {
+    const res = await fetch(`${s.base}/api/report`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ participantId }) });
+    assert.equal(res.status, 200);
+    return (Buffer.from(await res.arrayBuffer()).toString('latin1').match(/\/Type \/Page[^s]/g) || []).length;
+  };
+  const withPrompts = await pages();
+  s.store.getPrompts = async () => { throw new Error('Sheet down') };
+  const without = await pages();
+  assert.equal(withPrompts, without + 1, 'the appendix adds a page; without prompts the report still downloads');
+});
