@@ -173,6 +173,12 @@ select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;paddin
 .example-chip{min-height:40px;background:#fff;border:1px solid var(--field);color:var(--ink);border-radius:999px;padding:8px 14px;font:14px/1.3 var(--font-body);cursor:pointer;text-align:left;transition:border-color .15s,background .15s}
 .example-chip:hover{border-color:var(--ink);background:var(--nude)}
 .subcard .checks{padding-bottom:16px}.subcard .grid{padding-bottom:18px}
+.qc-title{margin:6px 0 8px!important}
+.qc-progress{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 14px}
+.qc-progress-head{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px;color:var(--muted);margin-bottom:8px}
+.qc-progress-head b{color:var(--ink)}
+.qc-progress .bar{height:6px;background:var(--nude-2);border-radius:99px;overflow:hidden}
+.qc-progress .bar span{display:block;height:100%;width:0;background:var(--red);transition:width .2s}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -338,8 +344,10 @@ select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;paddin
 <div class="label">Langkah 06 · Komitmen &amp; semakan</div>
 <h2>Komitmen &amp; Semakan</h2><p class="sub">Semak playbook anda, kemudian tetapkan tindakan untuk LIVE seterusnya.</p>
 <div class="subcard">
-<h3>Final Playbook Quality Check</h3>
-<p class="sub">Sebelum pulang, tandakan setiap item yang sudah lengkap.</p>
+<div class="eyebrow">Semak hasil anda</div>
+<h3 class="qc-title">Panduan LIVE Anda Dah Siap?</h3>
+<p class="sub">Sebelum tamat kelas, semak satu per satu. Tandakan ✓ jika sudah siap. Jika belum, anda boleh baiki sebelum LIVE seterusnya.</p>
+<div class="qc-progress"><div class="qc-progress-head"><span>Kemajuan semakan</span><b id="qcCount" aria-live="polite">0 / 9 siap</b></div><div class="bar" role="progressbar" aria-label="Kemajuan semakan" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0" id="qcBar"><span id="qcFill"></span></div></div>
 <div class="checks" id="qcList"></div>
 </div>
 <div class="subcard">

@@ -200,6 +200,11 @@ function updateProgress() {
   const approved = CARDS.filter((c) => approvals[c.id]).length;
   done += approved; total += CARDS.length;
   setStep('tools', approved, CARDS.length, `${approved}/${CARDS.length} lulus`);
+  // "Kemajuan semakan" in step 6
+  const qcDone = QC_ITEMS.filter((_, i) => $('qc' + i)?.checked).length;
+  $('qcCount').textContent = `${qcDone} / ${QC_ITEMS.length} siap`;
+  $('qcFill').style.width = (qcDone / QC_ITEMS.length) * 100 + '%';
+  $('qcBar').setAttribute('aria-valuenow', String(qcDone));
   const pct = Math.round((done / total) * 100);
   $('progressFill').style.width = pct + '%';
   $('progressBar').setAttribute('aria-valuenow', String(pct));

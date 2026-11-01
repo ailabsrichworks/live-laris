@@ -47,16 +47,17 @@ export const CARDS = [
 
 export const cardById = (id) => CARDS.find((c) => c.id === id);
 
+// Same order as the Sheet's "QC ·" columns (qc0–qc8).
 export const QC_ITEMS = [
-  'Maklumat produk, harga, pakej dan syarat disahkan.',
-  'Rundown mempunyai tujuan bagi setiap blok.',
-  'Opening hooks sesuai dengan pelanggan sasaran.',
-  'Skrip natural apabila dibaca kuat.',
-  'Demonstrasi boleh dibuat dengan peralatan tersedia.',
-  'Jawapan objection tidak membuat dakwaan tidak disokong.',
-  'CTA dan checkout telah diuji.',
-  'Follow-up sopan dan relevan.',
-  'Saya telah menerima feedback selepas praktis.',
+  "Saya sudah semak maklumat produk, harga, pakej dan syarat jualan.",
+  "Saya tahu apa nak cakap dan buat dalam setiap bahagian LIVE.",
+  "Ayat pembukaan LIVE saya sesuai untuk pelanggan sasaran.",
+  "Saya boleh baca skrip dengan cara bercakap saya sendiri.",
+  "Saya tahu cara tunjuk produk menggunakan peralatan yang ada.",
+  "Saya sudah semak jawapan pelanggan supaya tiada maklumat atau janji yang tidak benar.",
+  "Saya sudah cuba langkah pelanggan membuat pesanan dan bayaran.",
+  "Saya sudah sediakan mesej susulan yang sopan dan sesuai.",
+  "Saya sudah berlatih LIVE dan menerima cadangan penambahbaikan.",
 ];
 
 export const LEAKS = ['Attention', 'Retention', 'Interest', 'Confidence', 'Action'];
