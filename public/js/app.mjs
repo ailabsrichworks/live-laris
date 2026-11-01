@@ -99,6 +99,17 @@ async function ensureSummary(force) {
   } finally { summarising = false; $('summaryBtn').disabled = false }
 }
 
+// Platform LIVE: several tick boxes, saved together as one comma-separated value in #platform.
+const platformBoxes = () => document.querySelectorAll('input[name="platformOpt"]');
+function platformToValue() {
+  $('platform').value = [...platformBoxes()].filter((b) => b.checked).map((b) => b.value).join(', ');
+  $('platform').dispatchEvent(new Event('change')); // autosave + progress
+}
+function platformFromValue() {
+  const chosen = new Set($('platform').value.split(',').map((s) => s.trim()).filter(Boolean));
+  platformBoxes().forEach((b) => (b.checked = chosen.has(b.value)));
+}
+
 function loadCached() { try { fill(JSON.parse(store.get(CACHE_KEY) || '{}')) } catch { /* corrupt cache */ } setPid(participantId) }
 function newProfile() {
   if (!confirm('Mula profil baru? Borang akan dikosongkan pada peranti ini. Profil lama kekal dalam Google Sheet.')) return;
@@ -217,7 +228,26 @@ document.querySelectorAll('nav button[data-tab]').forEach((b) => b.addEventListe
   next(b.dataset.tab);
 }));
 $('qcList').innerHTML = QC_ITEMS.map((q, i) => `<label><input type="checkbox" id="qc${i}"> ${q}</label>`).join('');
-loadCached(); renderModules(); renderApprovals(); updateProgress(); next('business', false);
+loadCached(); platformFromValue(); renderModules(); renderApprovals(); updateProgress(); next('business', false);
+platformBoxes().forEach((b) => b.addEventListener('change', platformToValue));
+
+// "Perlu bantuan? Lihat contoh jawapan": an example chip fills its field (replace) or adds to it (append).
+document.addEventListener('click', (e) => {
+  const chip = e.target.closest('button[data-example-for]');
+  const target = chip && $(chip.dataset.exampleFor);
+  if (!target) return;
+  const suggested = chip.dataset.exampleText, current = target.value.trim();
+  if (chip.dataset.exampleMode === 'append' && suggested !== 'Belum pasti' && current && current !== 'Belum pasti') {
+    const parts = current.split(/\s*[,;]\s*/).filter(Boolean);
+    if (!parts.some((x) => x.toLocaleLowerCase('ms') === suggested.toLocaleLowerCase('ms'))) parts.push(suggested);
+    target.value = parts.join(', ');
+  } else {
+    target.value = suggested;
+  }
+  target.dispatchEvent(new Event('input', { bubbles: true }));
+  target.dispatchEvent(new Event('change', { bubbles: true })); // autosave
+  target.focus();
+});
 // Autosave a few seconds after the participant changes any field
 fields().forEach((e) => {
   e.addEventListener('input', () => { updateProgress(); if (e.getAttribute('aria-invalid') === 'true' && e.value.trim()) markField(e.id, false) });
