@@ -11,8 +11,9 @@ import dosdonts from './modules/dosdonts.mjs';
 import script from './modules/script.mjs';
 import objection from './modules/objection.mjs';
 import cta from './modules/cta.mjs';
+import rehearsal from './modules/rehearsal.mjs';
 
-const MODULES = { reality, product, angles, rundown, dosdonts, script, objection, cta };
+const MODULES = { reality, product, angles, rundown, dosdonts, script, objection, cta, rehearsal };
 
 export const CARDS = [
   { id: 'reality', ref: '01 · Reality Check', name: 'LIVE Reality Check',
