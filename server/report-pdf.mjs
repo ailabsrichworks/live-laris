@@ -5,6 +5,7 @@ import PDFDocument from 'pdfkit';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CARDS, QC_ITEMS, LEAKS, LEAK_LABELS, METRICS } from '../public/js/cards.mjs';
+import { parseBlocks } from '../public/js/richtext.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const fonts = path.join(here, 'fonts');
@@ -83,14 +84,53 @@ export function reportPdf({ participantId, data = {}, approvals = {}, prompts = 
     text(label, { size: 8.5, font: 'Bold', color: C.muted, gap: 1 });
     text(v, { gap: 7 });
   };
-  // Approved ChatGPT text: light markdown (headings, bold markers, bullets, table rows) made readable.
+  // A table from a ChatGPT answer: bordered cells that wrap, a nude header row repeated on each new
+  // page, columns sized by their content. Too many columns to fit legibly → one line per row.
+  const table = ({ header, rows }) => {
+    const n = (header || rows[0] || []).length;
+    if (!n) return;
+    if (n > 6) {
+      [header, ...rows].filter(Boolean).forEach((r) => { room(16); text(r.join('   |   '), { size: 9, color: C.text, gap: 1.5 }) });
+      return;
+    }
+    const pad = 5, size = 8.5;
+    const weight = Array.from({ length: n }, (_, c) => {
+      const cells = [header, ...rows].filter(Boolean).map((r) => clean(r[c]));
+      const longestWord = Math.max(...cells.flatMap((t) => t.split(/\s+/).map((w) => w.length)));
+      return Math.max(longestWord + 2, Math.min(40, Math.max(6, ...cells.map((t) => t.length))));
+    });
+    const total = weight.reduce((a, b) => a + b, 0);
+    const widths = weight.map((w) => (w / total) * W);
+    const cellH = (cells, font) => Math.max(...cells.map((t, c) => doc.font(font).fontSize(size).heightOfString(clean(t) || ' ', { width: widths[c] - 2 * pad, lineGap: 1 }))) + 2 * pad;
+    const drawRow = (cells, isHeader) => {
+      const font = isHeader ? 'Bold' : 'Body';
+      const h = cellH(cells, font);
+      const y = doc.y;
+      let x = L;
+      cells.forEach((t, c) => {
+        if (isHeader) doc.rect(x, y, widths[c], h).fill(C.nude);
+        doc.rect(x, y, widths[c], h).lineWidth(0.6).strokeColor(C.line).stroke();
+        doc.font(font).fontSize(size).fillColor(isHeader ? C.ink : C.text).text(clean(t), x + pad, y + pad, { width: widths[c] - 2 * pad, lineGap: 1 });
+        x += widths[c];
+      });
+      doc.x = L;
+      doc.y = y + h;
+    };
+    doc.y += 4;
+    if (header) { room(cellH(header, 'Bold') + 30); drawRow(header, true); }
+    rows.forEach((r) => {
+      if (doc.y + cellH(r, 'Body') > bottom()) { doc.addPage(); if (header) drawRow(header, true); }
+      drawRow(r, false);
+    });
+    doc.y += 8;
+  };
+  // Approved ChatGPT text: headings, bold markers and bullets made readable; tables drawn as tables.
   const richText = (raw) => {
-    for (let line of String(raw).replace(/\r/g, '').split('\n')) {
-      if (/^\s*\|?\s*:?-{3,}/.test(line)) continue; // table separator row
-      line = line.replace(/\*\*|__/g, '');
+    for (const block of parseBlocks(raw)) {
+      if (block.type === 'table') { table(block); continue; }
+      let line = block.text.replace(/\*\*|__/g, '');
       const h = line.match(/^\s*#{1,6}\s+(.*)/);
       if (h) { room(30); doc.y += 4; text(h[1], { font: 'Display', size: 11.5, gap: 3 }); continue; }
-      if (/^\s*\|.*\|\s*$/.test(line)) line = line.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim()).join('   |   ');
       line = line.replace(/^(\s*)[-*•]\s+/, '$1•  ');
       if (!line.trim()) { doc.y += 4; continue; }
       room(16);

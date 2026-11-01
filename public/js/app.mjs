@@ -1,4 +1,5 @@
 import { CARDS, QC_ITEMS, profileText } from './cards.mjs';
+import { parseBlocks } from './richtext.mjs';
 
 const $ = (id) => document.getElementById(id);
 const store = {
@@ -185,8 +186,22 @@ async function approveOutput() {
 }
 function renderApprovals() {
   const list = CARDS.filter((c) => approvals[c.id]);
-  $('approvedList').innerHTML = list.length ? `<h3 style="margin-top:16px">Output diluluskan (${list.length}/${CARDS.length})</h3>` + list.map((c) => `<details class="approved"><summary>✓ ${c.title}${approvals[c.id].at ? ' · ' + approvals[c.id].at : ''}</summary><pre></pre></details>`).join('') : '';
-  $('approvedList').querySelectorAll('pre').forEach((p, i) => (p.textContent = approvals[list[i].id].text));
+  $('approvedList').innerHTML = list.length ? `<h3 style="margin-top:16px">Output diluluskan (${list.length}/${CARDS.length})</h3>` + list.map((c) => `<details class="approved"><summary>✓ ${c.title}${approvals[c.id].at ? ' · ' + approvals[c.id].at : ''}</summary><div class="answer"></div></details>`).join('') : '';
+  $('approvedList').querySelectorAll('.answer').forEach((el, i) => showAnswer(el, approvals[list[i].id].text));
+}
+// Plain lines stay as typed; tables in the answer become real tables (scrolling sideways on a phone).
+function showAnswer(el, raw) {
+  const add = (parent, tag, text) => { const n = document.createElement(tag); if (text !== undefined) n.textContent = text; parent.append(n); return n; };
+  let pre = null;
+  for (const b of parseBlocks(raw)) {
+    if (b.type === 'text') { pre ||= add(el, 'pre'); pre.textContent += (pre.textContent ? '\n' : '') + b.text; continue; }
+    pre = null;
+    const table = add(add(el, 'div'), 'table');
+    table.parentElement.className = 'table-wrap';
+    if (b.header) { const tr = add(add(table, 'thead'), 'tr'); b.header.forEach((c) => add(tr, 'th', c)); }
+    const body = add(table, 'tbody');
+    b.rows.forEach((r) => { const tr = add(body, 'tr'); r.forEach((c) => add(tr, 'td', c)); });
+  }
 }
 function renderModules() {
   $('moduleGrid').innerHTML = CARDS.map((c, i) => `<article class="module">${approvals[c.id] ? `<span class="badge">${ICON.check}Diluluskan</span>` : ''}<div class="ref">${c.ref.toUpperCase()}</div><h3>${String(i + 1).padStart(2, '0')} · ${c.title}</h3><p>${c.short}</p><button class="btn gen-btn ${c.id === 'playbook' ? 'red' : 'light'}" onclick="makePrompt('${c.id}')"${generating ? ' disabled' : ''}>Sediakan Arahan ChatGPT ${ICON.arrow}</button></article>`).join('');
