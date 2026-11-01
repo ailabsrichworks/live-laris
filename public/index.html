@@ -179,6 +179,7 @@ select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;paddin
 .qc-progress-head b{color:var(--ink)}
 .qc-progress .bar{height:6px;background:var(--nude-2);border-radius:99px;overflow:hidden}
 .qc-progress .bar span{display:block;height:100%;width:0;background:var(--red);transition:width .2s}
+#commit .grid{align-items:end}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -351,15 +352,15 @@ select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;paddin
 <div class="checks" id="qcList"></div>
 </div>
 <div class="subcard">
-<h3>My Next LIVE Commitment</h3>
-<p class="sub">Tukar hasil kelas kepada satu tindakan yang mempunyai tarikh.</p>
+<h3>Pelan LIVE Saya Seterusnya</h3>
+<p class="sub">Rancang LIVE anda yang seterusnya. Pilih satu perkara untuk diperbaiki dan semak hasil selepas LIVE.</p>
 <div class="grid">
-<div class="field"><label for="nextLiveAt">Tarikh dan masa LIVE seterusnya</label><input id="nextLiveAt" placeholder="Contoh: Rabu 9 malam"></div>
-<div class="field"><label for="nextProduct">Produk yang akan difokuskan</label><input id="nextProduct"></div>
-<div class="field"><label for="nextChange">Satu perubahan yang akan diuji</label><input id="nextChange" placeholder="Contoh: uji 2 opening hooks"></div>
-<div class="field"><label for="nextMetric">Metrik yang akan direkod</label><input id="nextMetric" placeholder="Contoh: pertanyaan dan pesanan"></div>
-<div class="field"><label for="reviewDate">Tarikh semak hasil LIVE</label><input id="reviewDate"></div>
-<div class="field full"><label for="commitNotes">Nota / tindakan susulan</label><textarea id="commitNotes"></textarea></div>
+<div class="field"><label for="nextLiveAt">Bila anda akan buat LIVE seterusnya?</label><input id="nextLiveAt" placeholder="Contoh: 5 Nov, 9 malam"></div>
+<div class="field"><label for="nextProduct">Produk apa yang anda nak jual semasa LIVE?</label><input id="nextProduct" placeholder="Contoh: Sambal Goreng Bilis"></div>
+<div class="field full"><label for="nextChange">Apa satu perkara yang anda nak cuba atau baiki?</label><input id="nextChange" placeholder="Contoh: Cuba ayat pembukaan yang baharu"></div>
+<div class="field full"><label for="nextMetric">Apa yang anda nak kira atau catat selepas LIVE?</label><input id="nextMetric" placeholder="Contoh: Jumlah penonton, pertanyaan dan pesanan"></div>
+<div class="field full"><label for="reviewDate">Bila anda akan semak hasil LIVE?</label><input id="reviewDate" placeholder="Contoh: 6 Nov, selepas LIVE"></div>
+<div class="field full"><label for="commitNotes">Apa lagi yang anda perlu sediakan? (Jika ada)</label><textarea id="commitNotes" placeholder="Contoh: Sediakan stok, semak pautan pembelian dan lampu LIVE"></textarea></div>
 </div>
 </div>
 <div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Komitmen</button><button class="btn red gen-btn" onclick="makePrompt('playbook')">Jana Master Playbook →</button></div><div class="status sync"></div>
