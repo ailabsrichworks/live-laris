@@ -30,7 +30,8 @@ test('asks Claude Sonnet with a cached system prompt and returns its prompt', as
   assert.deepEqual(p.system[0].cache_control, { type: 'ephemeral' });
   const msg = p.messages[0].content;
   assert.match(msg, /<kad_ai>[\s\S]*LIVE Rundown/);
-  assert.match(msg, /Action 5 \(ramai tanya harga\)/);
+  assert.match(msg, /Masalah semasa LIVE \(skor 1 = tiada masalah, 5 = sangat serius\)/);
+  assert.match(msg, /Penonton tak jadi beli \(Action\) 5 \(ramai tanya harga\)/, 'plain label, score, and a sign saved by an older version');
   assert.doesNotMatch(msg, /SKRIP/, 'approved outputs go only to the Master Playbook');
 });
 

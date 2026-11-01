@@ -7,7 +7,9 @@ test('every form field has a Sheet column, and every card an approval column', (
   const gs = loadAppsScript();
   const ids = formFieldIds();
   assert.deepEqual(ids.filter((id) => !gs.FORM_KEYS.includes(id)), [], 'form fields without a column');
-  assert.deepEqual(gs.FORM_KEYS.filter((k) => !ids.includes(k)), [], 'columns without a form field');
+  // Kept in the Sheet for answers saved before the form dropped them
+  const retired = ['Attention', 'Retention', 'Interest', 'Confidence', 'Action'].map((n) => `leak${n}Sign`);
+  assert.deepEqual(gs.FORM_KEYS.filter((k) => !ids.includes(k) && !retired.includes(k)), [], 'columns without a form field');
   assert.deepEqual(gs.CARD_IDS, CARDS.map((c) => c.id));
 });
 

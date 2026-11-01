@@ -102,9 +102,6 @@ input[type=checkbox]{width:20px;height:20px;min-height:0;padding:0;flex-shrink:0
 .status{font-size:14px;color:var(--muted);margin-top:10px;min-height:1.4em}.status.ok{color:var(--ok)}.status.err{color:var(--error-ink)}
 
 /* Reality Check */
-.leaks{display:grid;grid-template-columns:1.2fr 120px 1.4fr;gap:10px 12px;align-items:center}
-.leaks .h{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.leaks .name b{display:block;font-family:var(--font-display);font-size:16px}.leaks .name span{display:block;font-size:13px;color:var(--muted)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chips label{display:flex;gap:8px;align-items:center;min-height:44px;border:1px solid var(--line);border-radius:14px;padding:10px 13px;font-size:15px;font-weight:400;margin:0;cursor:pointer;transition:border-color .15s,background .15s}
 .chips label:hover{border-color:var(--field)}
@@ -144,7 +141,6 @@ input[type=checkbox]{width:20px;height:20px;min-height:0;padding:0;flex-shrink:0
 .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:25px}
 .footer p{margin:0 0 6px}.footer .footer-brand{color:var(--ink);font-weight:700;font-size:13px}
 
-@media(max-width:760px){.leaks{grid-template-columns:1fr 100px}.leaks .sign{grid-column:1/-1}.leaks .h:last-child{display:none}}
 @media(max-width:430px){nav{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}.spinner{animation:none}}
 
@@ -155,6 +151,14 @@ input[type=checkbox]{width:20px;height:20px;min-height:0;padding:0;flex-shrink:0
 .ai-tag{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:2px 8px;border-radius:999px;background:var(--nude);font-size:12px;font-weight:700;vertical-align:1px}
 .ai-tag svg{width:13px;height:13px;color:var(--red)}
 .summary-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}.summary-row .help{margin:0}
+
+.scale{font-size:14px;font-weight:700;color:var(--ink);margin:-8px 0 6px}
+.leaks{display:grid}
+.leak{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.leak-text{min-width:0}
+.leak-title{display:block;font-family:var(--font-display);font-size:17px;font-weight:700;line-height:1.3;margin:0;cursor:pointer}
+.leak-sub{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;padding:10px 14px}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -233,15 +237,15 @@ input[type=checkbox]{width:20px;height:20px;min-height:0;padding:0;flex-shrink:0
 <div class="field full"><label for="commonQuestions">Soalan paling kerap ditanya?</label><textarea id="commonQuestions" placeholder="Contoh: harga, kos penghantaran, sesuai untuk kulit sensitif?"></textarea></div>
 <div class="field full"><label for="checkout">Bagaimana pelanggan membeli? (checkout)</label><select id="checkout"><option value="">— Pilih —</option><option>TikTok Shop / bakul kuning</option><option>Shopee checkout</option><option>Website / online store</option><option>WhatsApp / DM</option><option>Transfer bank / invois</option><option>Ejen / reseller</option><option>Belum ada proses tetap</option></select></div>
 </div>
-<h3>Lima titik kebocoran LIVE</h3>
-<p class="sub">Beri keutamaan 1 (paling kecil) hingga 5 (paling teruk). Baiki titik paling lemah dahulu.</p>
+<h3>Kenal Pasti Masalah Semasa LIVE</h3>
+<p class="sub">Berdasarkan pengalaman anda, beri skor untuk setiap masalah.</p>
+<p class="scale">1 = Tiada masalah · 5 = Masalah sangat serius</p>
 <div class="leaks">
-<div class="h">Titik kebocoran</div><div class="h">Keutamaan</div><div class="h">Tanda yang saya alami</div>
-<div class="name"><b>Attention</b><span>Viewers tidak berhenti scroll</span></div><select id="leakAttention" aria-label="Attention · keutamaan"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><input class="sign" id="leakAttentionSign" aria-label="Attention · tanda yang saya alami" placeholder="Tanda…">
-<div class="name"><b>Retention</b><span>Viewers masuk tetapi cepat keluar</span></div><select id="leakRetention" aria-label="Retention · keutamaan"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><input class="sign" id="leakRetentionSign" aria-label="Retention · tanda yang saya alami" placeholder="Tanda…">
-<div class="name"><b>Interest</b><span>Viewers menonton tetapi tidak bertanya</span></div><select id="leakInterest" aria-label="Interest · keutamaan"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><input class="sign" id="leakInterestSign" aria-label="Interest · tanda yang saya alami" placeholder="Tanda…">
-<div class="name"><b>Confidence</b><span>Viewers bertanya tetapi belum yakin</span></div><select id="leakConfidence" aria-label="Confidence · keutamaan"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><input class="sign" id="leakConfidenceSign" aria-label="Confidence · tanda yang saya alami" placeholder="Tanda…">
-<div class="name"><b>Action</b><span>Viewers berminat tetapi tidak checkout</span></div><select id="leakAction" aria-label="Action · keutamaan"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><input class="sign" id="leakActionSign" aria-label="Action · tanda yang saya alami" placeholder="Tanda…">
+<div class="leak"><div class="leak-text"><label class="leak-title" for="leakAttention">1. Susah tarik penonton</label><span class="leak-sub" id="leakAttentionHelp">Orang terus scroll, tak berhenti tengok LIVE</span></div><select class="score" id="leakAttention" aria-describedby="leakAttentionHelp"><option value="">Skor</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+<div class="leak"><div class="leak-text"><label class="leak-title" for="leakRetention">2. Penonton cepat keluar</label><span class="leak-sub" id="leakRetentionHelp">Orang masuk LIVE tapi tak tengok lama</span></div><select class="score" id="leakRetention" aria-describedby="leakRetentionHelp"><option value="">Skor</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+<div class="leak"><div class="leak-text"><label class="leak-title" for="leakInterest">3. Penonton kurang bertanya</label><span class="leak-sub" id="leakInterestHelp">Orang tengok tapi kurang komen atau bertanya</span></div><select class="score" id="leakInterest" aria-describedby="leakInterestHelp"><option value="">Skor</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+<div class="leak"><div class="leak-text"><label class="leak-title" for="leakConfidence">4. Penonton belum yakin</label><span class="leak-sub" id="leakConfidenceHelp">Orang bertanya tapi masih ragu-ragu nak beli</span></div><select class="score" id="leakConfidence" aria-describedby="leakConfidenceHelp"><option value="">Skor</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+<div class="leak"><div class="leak-text"><label class="leak-title" for="leakAction">5. Penonton tak jadi beli</label><span class="leak-sub" id="leakActionHelp">Orang berminat tapi tak buat pesanan</span></div><select class="score" id="leakAction" aria-describedby="leakActionHelp"><option value="">Skor</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
 </div>
 <div class="grid" style="margin-top:16px">
 <div class="field full"><label for="improveOne">Satu perkara paling penting yang saya mahu perbaiki</label><textarea id="improveOne"></textarea></div>

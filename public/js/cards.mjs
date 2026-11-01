@@ -50,6 +50,11 @@ export const QC_ITEMS = [
 ];
 
 export const LEAKS = ['Attention', 'Retention', 'Interest', 'Confidence', 'Action'];
+// What participants see for each leakage point ("Kenal Pasti Masalah Semasa LIVE").
+export const LEAK_LABELS = {
+  Attention: 'Susah tarik penonton', Retention: 'Penonton cepat keluar', Interest: 'Penonton kurang bertanya',
+  Confidence: 'Penonton belum yakin', Action: 'Penonton tak jadi beli',
+};
 
 export const METRICS = {
   mAttention: 'Attention', mEngagement: 'Engagement', mIntent: 'Intent', mConversion: 'Conversion', mFollowup: 'Follow-up',
@@ -77,10 +82,10 @@ const or = (s) => s || '[Belum diberikan]';
 export function profileText(d) {
   const lines = Object.entries(LABELS).map(([k, l]) => `${l}: ${or(v(d, k))}`);
   const leaks = LEAKS.map((n) => {
-    const sign = v(d, `leak${n}Sign`);
-    return `${n} ${v(d, `leak${n}`) || '-'}${sign ? ` (${sign})` : ''}`;
+    const sign = v(d, `leak${n}Sign`); // only on profiles saved before the sign boxes were removed
+    return `${LEAK_LABELS[n]} (${n}) ${v(d, `leak${n}`) || '-'}${sign ? ` (${sign})` : ''}`;
   }).join('; ');
-  lines.splice(lines.findIndex((l) => l.startsWith('Satu perkara')), 0, `Titik kebocoran (keutamaan 1–5): ${leaks}`);
+  lines.splice(lines.findIndex((l) => l.startsWith('Satu perkara')), 0, `Masalah semasa LIVE (skor 1 = tiada masalah, 5 = sangat serius): ${leaks}`);
   const metrics = Object.entries(METRICS).filter(([k]) => v(d, k)).map(([, n]) => n);
   lines.push(`Metrik dipilih: ${metrics.join(', ') || '[Belum dipilih]'}`);
   lines.push(`Final Quality Check: ${QC_ITEMS.map((q, i) => (v(d, `qc${i}`) ? '✓ ' : '☐ ') + q).join(' | ')}`);
