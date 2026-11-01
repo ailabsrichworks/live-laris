@@ -155,7 +155,7 @@ async function makePrompt(idOrName) {
   $('promptBox').classList.add('loading');
   $('promptBox').innerHTML = '<span class="spinner" aria-hidden="true"></span><span></span>';
   $('promptBox').lastChild.textContent = 'AI sedang menyediakan arahan untuk ' + card.title + '… (10–30 saat)';
-  $('promptSource').textContent = ''; $('promptSource').className = 'source'; $('copyStatus').textContent = '';
+  $('promptSource').textContent = ''; $('promptSource').className = 'source'; $('copyStatus').textContent = ''; $('approveStatus').textContent = '';
   $('approveLabel').textContent = 'Jawapan ChatGPT untuk: ' + card.title;
   $('aiOutput').value = approvals[card.id]?.text || '';
   await saveProfile(true);
@@ -193,7 +193,7 @@ async function makePlaybook(card) {
   $('promptBox').classList.add('loading');
   $('promptBox').innerHTML = '<span class="spinner" aria-hidden="true"></span><span></span>';
   $('promptBox').lastChild.textContent = 'AI sedang menyusun Master Playbook daripada semua bahan yang anda luluskan… (1–3 minit)';
-  $('promptSource').textContent = ''; $('promptSource').className = 'source'; $('copyStatus').textContent = '';
+  $('promptSource').textContent = ''; $('promptSource').className = 'source'; $('copyStatus').textContent = ''; $('approveStatus').textContent = '';
   $('approveLabel').textContent = 'Master Playbook anda';
   await saveProfile(true);
   try {
@@ -220,17 +220,27 @@ async function makePlaybook(card) {
     $('promptBox').textContent = 'Gagal menyusun Master Playbook: ' + err.message + '. Cuba klik sekali lagi.';
   } finally { setGenerating(false) }
 }
+// Feedback shows right under the button, and the button is locked while saving so one click saves once.
+let approving = false;
 async function approveOutput() {
+  if (approving) return;
   const t = $('aiOutput').value.trim();
-  if (!currentCard) { alert('Jana prompt dahulu.'); return }
-  if (!t) { alert('Tampal jawapan AI dahulu.'); return }
-  await saveProfile(true);
-  if (!participantId) { alert('Profil belum disimpan. Cuba lagi.'); return }
+  const say = (msg, kind) => { $('approveStatus').textContent = msg; $('approveStatus').className = 'status' + (kind ? ' ' + kind : '') };
+  if (!currentCard) { say('Pilih bahan di Langkah 04 dan sediakan arahan dahulu.', 'err'); return }
+  if (!t) { say('Tampal jawapan AI dahulu.', 'err'); $('aiOutput').focus(); return }
+  approving = true; $('approveBtn').disabled = true;
+  say('Menyimpan…');
   try {
+    await saveProfile(true);
+    if (!participantId) throw new Error('Profil belum disimpan. Cuba lagi');
     const r = await api('/api/approve', { participantId, card: currentCard.id, text: t });
     approvals[currentCard.id] = { text: t, at: r.at }; saveApprovals(); renderApprovals(); renderModules(); updateProgress();
-    $('copyStatus').textContent = '✓ ' + currentCard.title + ' diluluskan dan disimpan. Ia akan dimasukkan ke Panduan LIVE Lengkap.';
-  } catch (err) { alert('Gagal meluluskan: ' + err.message) }
+    const msg = currentCard.id === 'playbook'
+      ? '✓ Master Playbook diluluskan dan disimpan. Ia akan dimasukkan ke laporan penuh.'
+      : '✓ ' + currentCard.title + ' diluluskan dan disimpan. Ia akan dimasukkan ke Panduan LIVE Lengkap.';
+    say(msg, 'ok'); $('copyStatus').textContent = msg;
+  } catch (err) { say('✗ Gagal meluluskan: ' + err.message + '. Cuba lagi.', 'err') }
+  finally { approving = false; $('approveBtn').disabled = false }
 }
 function renderApprovals() {
   const list = CARDS.filter((c) => approvals[c.id]);

@@ -337,7 +337,7 @@ textarea.grow{min-height:48px;resize:none;overflow:hidden}
 <h3>Tampal jawapan AI &amp; luluskan</h3>
 <p class="sub">Input → AI → <b>Semak / Edit → Lulus</b> → Master Playbook. Buang apa-apa yang tidak tepat sebelum meluluskan.</p>
 <div class="field"><label id="approveLabel" for="aiOutput">Jawapan AI</label><textarea id="aiOutput" style="min-height:160px" placeholder="Tampal jawapan ChatGPT di sini dan edit…"></textarea></div>
-<div class="actions"><button class="btn" onclick="approveOutput()"><svg aria-hidden="true"><use href="#i-check"/></svg>Lulus &amp; simpan</button></div>
+<div class="actions"><button class="btn" id="approveBtn" onclick="approveOutput()"><svg aria-hidden="true"><use href="#i-check"/></svg>Lulus &amp; simpan</button></div><p id="approveStatus" class="status" aria-live="polite"></p>
 <div id="approvedList"></div>
 </div>
 <div class="note">Keselamatan data: profil disimpan ke Google Sheet penganjur program dan dalam browser ini. Jangan masukkan maklumat sensitif pelanggan atau dokumen sulit.</div>
