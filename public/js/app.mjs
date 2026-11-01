@@ -205,11 +205,46 @@ function updateProgress() {
   $('qcCount').textContent = `${qcDone} / ${QC_ITEMS.length} siap`;
   $('qcFill').style.width = (qcDone / QC_ITEMS.length) * 100 + '%';
   $('qcBar').setAttribute('aria-valuenow', String(qcDone));
+  updateReportCard(qcDone);
   const pct = Math.round((done / total) * 100);
   $('progressFill').style.width = pct + '%';
   $('progressBar').setAttribute('aria-valuenow', String(pct));
   $('progressText').innerHTML = `<b>${pct}%</b> lengkap`;
 }
+// ---- Full report (PDF): ready once step 1 is complete and the Master Playbook is approved ----
+let reporting = false;
+function updateReportCard(qcDone) {
+  const reqs = [
+    [missingProfile().length === 0, 'Profil bisnes lengkap', true],
+    [Boolean(approvals.playbook), 'Panduan LIVE Lengkap (Master Playbook) diluluskan', true],
+    [qcDone === QC_ITEMS.length, `Semakan ${qcDone} / ${QC_ITEMS.length} siap`, false],
+  ];
+  $('reportReqs').innerHTML = reqs.map(([ok, label, required]) =>
+    `<li class="${ok ? 'ok' : ''}"><span class="dot">${ok ? ICON.check : ''}</span><span>${label}${required ? '' : ' <small>(digalakkan)</small>'}</span></li>`).join('');
+  $('reportBtn').disabled = reporting || !reqs.every(([ok, , required]) => ok || !required);
+}
+async function downloadReport() {
+  if (reporting) return;
+  reporting = true; $('reportBtn').disabled = true;
+  $('reportStatus').className = 'status'; $('reportStatus').textContent = 'Menyediakan laporan anda… (10–20 saat)';
+  try {
+    await saveProfile(true);
+    const res = await fetch('/api/report', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ participantId }) });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `HTTP ${res.status}`);
+    const blob = await res.blob();
+    const name = decodeURIComponent((res.headers.get('content-disposition') || '').match(/filename\*=UTF-8''([^;]+)/)?.[1] || 'Panduan-LIVE.pdf');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    const saved = res.headers.get('x-report-saved') === '1';
+    $('reportStatus').className = 'status ok';
+    $('reportStatus').textContent = saved ? '✓ Laporan dimuat turun. Satu salinan disimpan untuk penganjur program.'
+      : '✓ Laporan dimuat turun. (Salinan untuk penganjur belum dapat disimpan — sila maklumkan fasilitator.)';
+  } catch (err) {
+    $('reportStatus').className = 'status err'; $('reportStatus').textContent = '✗ Gagal menyediakan laporan: ' + err.message;
+  } finally { reporting = false; updateProgress() }
+}
+
 function copyPrompt() { copyText($('promptBox').textContent).then(() => ($('copyStatus').textContent = '✓ Prompt disalin. Tampal ke ChatGPT.')).catch(() => ($('copyStatus').textContent = 'Pilih dan salin teks prompt secara manual.')) }
 function downloadProfile() { const blob = new Blob([profileText(collect())], { type: 'text/plain;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'LIVE-LARIS-Profil-Peserta.txt'; a.click(); URL.revokeObjectURL(a.href) }
 function openChatGPT() { window.open('https://chatgpt.com/', '_blank', 'noopener') }
@@ -223,7 +258,7 @@ function next(id, scroll = true) {
 }
 
 // Inline onclick handlers in index.html call these.
-Object.assign(window, { saveProfile, saveBusiness, nextFromBusiness, ensureSummary, newProfile, makePrompt, approveOutput, copyPrompt, downloadProfile, openChatGPT, next });
+Object.assign(window, { saveProfile, saveBusiness, nextFromBusiness, ensureSummary, downloadReport, newProfile, makePrompt, approveOutput, copyPrompt, downloadProfile, openChatGPT, next });
 
 document.querySelectorAll('nav button[data-tab]').forEach((b) => b.addEventListener('click', () => {
   if (currentStep === 'business' && b.dataset.tab !== 'business') {

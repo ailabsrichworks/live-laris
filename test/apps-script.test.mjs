@@ -95,3 +95,25 @@ test('upgrades a tab that only has the old V1 header, but never rewrites one wit
   assert.equal(withData.g[1][1], 'keep me');
   assert.equal(withData.g[0].length, 1 + gs2.PROFILE_HEADERS.length, 'missing columns added on the right');
 });
+
+test('saves the report PDF to the Drive folder, replaces the previous one and links it in the Sheet', () => {
+  const gs = loadAppsScript();
+  const id = gs.call('saveProfile', { data: { businessName: 'Sambal Mak Long' } }).result.participantId;
+  const pdf = Buffer.from('%PDF-1.7 test').toString('base64');
+  const first = gs.call('saveReport', { participantId: id, base64: pdf, name: 'Panduan LIVE · Sambal Mak Long.pdf' }).result;
+  assert.match(first.link, /^https:\/\/drive\.google\.com\/file\/d\/file\d+\/view$/);
+  assert.equal(gs.drive.folders.size, 1);
+  assert.equal([...gs.drive.folders.values()][0].name, 'LIVE LARIS · Laporan Peserta');
+  assert.equal(gs.drive.files.get(first.fileId).blob.type, 'application/pdf');
+
+  const second = gs.call('saveReport', { participantId: id, base64: pdf, name: 'x.pdf' }).result;
+  assert.equal(gs.drive.files.get(first.fileId).trashed, true, 'previous report moved to the bin');
+  assert.equal(gs.drive.files.get(second.fileId).trashed, false);
+  assert.equal(gs.drive.folders.size, 1, 'same folder reused');
+
+  const sh = gs.sheets['LiveLaris Profiles'];
+  const col = (label) => sh.g[0].indexOf(gs.PROFILE_HEADERS.find((h) => h.endsWith('\n' + label)));
+  assert.equal(sh.g[1][col('Pautan laporan (Drive)')], second.link);
+  assert.equal(sh.g[1][col('Laporan disimpan')], '2026-10-31 18:00:00');
+  assert.equal(gs.call('saveReport', { participantId: 'LL-AAAAAAAA', base64: pdf }).ok, false);
+});

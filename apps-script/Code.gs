@@ -8,6 +8,8 @@
  * APPS_SCRIPT_URL on Railway.
  *
  * Every request must carry SECRET; without it the script refuses.
+ * Report PDFs go to a Drive folder "LIVE LARIS · Laporan Peserta" that the script creates in your
+ * Drive (running `setup` asks once for Drive access).
  */
 
 const SECRET = 'CHANGE-ME';
@@ -60,13 +62,16 @@ const SECTIONS = [
     ['approved_playbook', 'Master Playbook']]],
   ['AI · AKTIVITI', '#EFEFEF', [
     ['lastModule', 'Kad terakhir dijana'], ['lastPromptAt', 'Masa terakhir dijana'], ['promptCount', 'Jumlah prompt dijana']]],
+  ['LAPORAN PDF', '#F4CCCC', [
+    ['reportLink', 'Pautan laporan (Drive)'], ['reportAt', 'Laporan disimpan'], ['reportFileId', 'SISTEM · ID fail']]],
 ];
 const PROFILE_COLUMNS = [];
 SECTIONS.forEach(s => s[2].forEach(c => PROFILE_COLUMNS.push({ key: c[0], header: s[0] + '\n' + c[1], section: s[0], color: s[1] })));
 const PROFILE_HEADERS = PROFILE_COLUMNS.map(c => c.header);
 const KEY_BY_HEADER = {};
 PROFILE_COLUMNS.forEach(c => { KEY_BY_HEADER[c.header] = c.key; });
-const SYSTEM_KEYS = ['participantId', 'createdAt', 'updatedAt', 'lastModule', 'lastPromptAt', 'promptCount'];
+const SYSTEM_KEYS = ['participantId', 'createdAt', 'updatedAt', 'lastModule', 'lastPromptAt', 'promptCount', 'reportLink', 'reportAt', 'reportFileId'];
+const REPORT_FOLDER = 'LIVE LARIS · Laporan Peserta';
 const FORM_KEYS = PROFILE_COLUMNS.map(c => c.key).filter(k => SYSTEM_KEYS.indexOf(k) === -1 && k.indexOf('approved_') !== 0);
 const CARD_IDS = PROFILE_COLUMNS.map(c => c.key).filter(k => k.indexOf('approved_') === 0).map(k => k.slice(9));
 
@@ -96,6 +101,7 @@ function doGet() {
 /** Run once from the editor: creates or upgrades the tabs and styles the headers. */
 function setup() {
   profileSheet_();
+  reportFolder_(); // asks for Drive access on the first run
   logSheet_(PROMPT_SHEET, PROMPT_HEADERS);
   logSheet_(ANSWER_SHEET, ANSWER_HEADERS);
   Logger.log('✓ Tabs ready in "%s"', spreadsheet_().getName());
@@ -112,6 +118,7 @@ function handle_(req) {
     case 'loadProfile': return loadProfile_(req.participantId);
     case 'saveApproval': return saveApproval_(req.participantId, req.cardId, req.text);
     case 'logPrompt': return logPrompt_(req.entry);
+    case 'saveReport': return saveReport_(req.participantId, req.base64, req.name);
   }
   throw new Error('Unknown op: ' + req.op);
 }
@@ -160,6 +167,37 @@ function saveApproval_(participantId, cardId, text) {
   const card = PROFILE_COLUMNS.filter(c => c.key === 'approved_' + cardId)[0].header.split('\n')[1];
   appendLog_(ANSWER_SHEET, ANSWER_HEADERS, Object.assign({ timestamp: out.at, card: card, answer: answer }, names));
   return out;
+}
+
+/** Saves the participant's report PDF to the Drive folder (replacing their previous one) and links it in the Sheet. */
+function saveReport_(participantId, base64, name) {
+  const id = normaliseId_(participantId);
+  if (!id) throw new Error('ID peserta tidak sah');
+  if (!base64) throw new Error('Laporan kosong');
+  const blob = Utilities.newBlob(Utilities.base64Decode(base64), 'application/pdf', String(name || id + '.pdf').slice(0, 150));
+  const out = withProfileRow_(id, false, (get, set, _, now) => {
+    const old = get('reportFileId');
+    if (old) { try { DriveApp.getFileById(old).setTrashed(true); } catch (e) { /* already gone */ } }
+    const file = reportFolder_().createFile(blob);
+    set('reportFileId', file.getId());
+    set('reportLink', file.getUrl());
+    set('reportAt', now);
+    return { fileId: file.getId(), link: file.getUrl(), at: now };
+  });
+  if (!out) throw new Error('Profil tidak dijumpai');
+  return out;
+}
+
+/** The reports folder: created in your Drive on first use, remembered in Script Properties. */
+function reportFolder_() {
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty('REPORT_FOLDER_ID');
+  if (id) {
+    try { return DriveApp.getFolderById(id); } catch (e) { /* deleted: make a new one */ }
+  }
+  const folder = DriveApp.createFolder(REPORT_FOLDER);
+  props.setProperty('REPORT_FOLDER_ID', folder.getId());
+  return folder;
 }
 
 function logPrompt_(entry) {
@@ -230,7 +268,10 @@ function profileSheet_() {
     styleProfileHeader_(sh);
   } else {
     const missing = PROFILE_HEADERS.filter(h => current.indexOf(h) === -1);
-    if (missing.length) sh.getRange(1, current.length + 1, 1, missing.length).setValues([missing]).setFontWeight('bold').setWrap(true);
+    if (missing.length) {
+      sh.getRange(1, current.length + 1, 1, missing.length).setValues([missing]).setFontWeight('bold').setWrap(true).setVerticalAlignment('top');
+      missing.forEach((h, i) => sh.getRange(1, current.length + 1 + i).setBackground(PROFILE_COLUMNS[PROFILE_HEADERS.indexOf(h)].color));
+    }
   }
   return sh;
 }

@@ -21,7 +21,7 @@ async function start({ writer, limit = 30 } = {}) {
     const res = await fetch(base + path, body === undefined ? {} : { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     return { status: res.status, body: await res.json().catch(() => null), text: res.headers.get('content-type')?.includes('html') ? 'html' : '' };
   };
-  return { store, calls, req, close: () => server.close() };
+  return { store, calls, req, base, close: () => server.close() };
 }
 
 test('serves the page, health check and config', async (t) => {
@@ -108,4 +108,40 @@ test('approves an AI output for a saved participant only', async (t) => {
   assert.equal((await s.req('/api/approve', { participantId, card: 'rundown', text: 'RUNDOWN DRAF' })).status, 200);
   const loaded = (await s.req('/api/profile/' + participantId)).body;
   assert.equal(loaded.approvals.rundown.text, 'RUNDOWN DRAF');
+});
+
+const FULL = { owner: 'Aina', businessName: 'Sambal Mak Long', years: '1–3 tahun', model: 'Saya tidak pasti', industry: 'Makanan & Minuman',
+  team: 'Saya seorang', location: 'Seluruh Malaysia', sales: 'Bawah RM5,000', customer: 'Ibu bekerja', age: '25–34 tahun', customerNeed: 'Orang sibuk' };
+
+test('the full report needs a complete profile and an approved Master Playbook', async (t) => {
+  const s = await start(); t.after(s.close);
+  assert.equal((await s.req('/api/report', {})).status, 400);
+  const { participantId } = (await s.req('/api/profile', { data: { owner: 'Aina' } })).body;
+  const r = await s.req('/api/report', { participantId });
+  assert.equal(r.status, 409);
+  assert.match(r.body.error, /Profil bisnes belum lengkap.*Master Playbook/);
+});
+
+test('downloads the full report as a PDF and keeps a copy', async (t) => {
+  const s = await start(); t.after(s.close);
+  const { participantId } = (await s.req('/api/profile', { data: FULL })).body;
+  await s.req('/api/approve', { participantId, card: 'playbook', text: '## Panduan\n- Hook' });
+  const res = await fetch(`${s.base}/api/report`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ participantId }) });
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('content-type'), 'application/pdf');
+  assert.equal(res.headers.get('x-report-saved'), '1');
+  assert.match(decodeURIComponent(res.headers.get('content-disposition')), /Panduan LIVE · Sambal Mak Long · LL-/);
+  const pdf = Buffer.from(await res.arrayBuffer());
+  assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
+  assert.equal(Buffer.from(s.store.reports.get(participantId).base64, 'base64').length, pdf.length, 'the stored copy is the same file');
+});
+
+test('if the Drive copy fails, the participant still gets the PDF', async (t) => {
+  const s = await start(); t.after(s.close);
+  const { participantId } = (await s.req('/api/profile', { data: FULL })).body;
+  await s.req('/api/approve', { participantId, card: 'playbook', text: 'Panduan' });
+  s.store.saveReport = async () => { throw new Error('Drive down') };
+  const res = await fetch(`${s.base}/api/report`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ participantId }) });
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('x-report-saved'), '0');
 });

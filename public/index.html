@@ -180,6 +180,13 @@ select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;paddin
 .qc-progress .bar{height:6px;background:var(--nude-2);border-radius:99px;overflow:hidden}
 .qc-progress .bar span{display:block;height:100%;width:0;background:var(--red);transition:width .2s}
 #commit .grid{align-items:end}
+.req{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.req li{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--muted)}
+.req li .dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;background:#fff;border:1px solid var(--field);font-size:12px;font-weight:800}
+.req li.ok{color:var(--ink)}.req li.ok .dot{background:var(--ink);border-color:var(--ink);color:var(--nude)}
+.req li .dot svg{width:13px;height:13px}
+.req small{color:var(--muted);font-size:12px}
+#reportCard{padding-bottom:18px}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -362,6 +369,14 @@ select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;paddin
 <div class="field full"><label for="reviewDate">Bila anda akan semak hasil LIVE?</label><input id="reviewDate" placeholder="Contoh: 6 Nov, selepas LIVE"></div>
 <div class="field full"><label for="commitNotes">Apa lagi yang anda perlu sediakan? (Jika ada)</label><textarea id="commitNotes" placeholder="Contoh: Sediakan stok, semak pautan pembelian dan lampu LIVE"></textarea></div>
 </div>
+</div>
+<div class="subcard" id="reportCard">
+<div class="eyebrow">Laporan penuh</div>
+<h3 class="qc-title">Muat Turun Panduan LIVE Anda</h3>
+<p class="sub">Bila semua sudah siap, muat turun laporan penuh (PDF): profil, Reality Check, produk, Panduan LIVE Lengkap, bahan yang diluluskan, semakan dan pelan LIVE seterusnya. Satu salinan juga disimpan untuk penganjur program.</p>
+<ul class="req" id="reportReqs"></ul>
+<div class="actions" style="margin-top:10px"><button class="btn" id="reportBtn" onclick="downloadReport()" disabled><svg aria-hidden="true"><use href="#i-download"/></svg>Muat Turun Laporan Penuh (PDF)</button></div>
+<div class="status" id="reportStatus" aria-live="polite"></div>
 </div>
 <div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Komitmen</button><button class="btn red gen-btn" onclick="makePrompt('playbook')">Jana Master Playbook →</button></div><div class="status sync"></div>
 </section>

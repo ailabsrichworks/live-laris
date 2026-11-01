@@ -1,0 +1,185 @@
+// The participant's full LIVE LARIS report as a PDF (A4): their answers, the approved Master
+// Playbook and other approved materials, the quality check and their next-LIVE plan.
+// Same look as the Business Quick Fix report: Inter + Bricolage Grotesque (OFL), nude/red/black.
+import PDFDocument from 'pdfkit';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { CARDS, QC_ITEMS, LEAKS, LEAK_LABELS, METRICS } from '../public/js/cards.mjs';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const fonts = path.join(here, 'fonts');
+const LOGOS = { klinik: path.join(here, '..', 'public', 'img', 'klinik-bisnes-sme.png'), rcg: path.join(here, '..', 'public', 'img', 'rcg.png') };
+const C = { nude: '#f7eee1', red: '#c02026', ink: '#000000', text: '#2e2924', muted: '#5c534a', line: '#ebe1d3', soft: '#fcf8f2' };
+
+// Labels as participants see them on the page.
+const SECTIONS = [
+  ['01 · Profil bisnes', 'Profil Bisnes', [
+    ['owner', 'Nama'], ['businessName', 'Nama bisnes / jenama'], ['years', 'Tempoh berniaga'], ['model', 'Cara berniaga'],
+    ['industry', 'Industri'], ['team', 'Saiz team'], ['location', 'Kawasan pelanggan'], ['sales', 'Anggaran jualan sebulan'],
+    ['customer', 'Pelanggan sasaran'], ['age', 'Umur pelanggan'], ['customerNeed', 'Masalah pelanggan yang diselesaikan'],
+    ['businessDesc', 'Bisnes anda secara ringkas']]],
+  ['02 · Reality check', 'LIVE Selling Reality Check', [
+    ['platform', 'Platform LIVE'], ['experience', 'Pengalaman LIVE'], ['liveCount30', 'LIVE dalam 30 hari terakhir'],
+    ['liveDuration', 'Purata tempoh LIVE'], ['viewersEnter', 'Apa berlaku apabila viewers masuk'], ['commonQuestions', 'Soalan paling kerap'],
+    ['checkout', 'Cara pelanggan membeli']]],
+  ['03 · Produk / servis', 'Produk / Servis Anda', [
+    ['productType', 'Apa yang dijual'], ['productName', 'Produk / servis untuk LIVE'], ['price', 'Harga jualan'], ['size', 'Saiz / pilihan / pakej'],
+    ['features', 'Ciri atau bahan penting'], ['benefits', 'Manfaat untuk pelanggan'], ['difference', 'Keistimewaan'], ['proof', 'Bukti / sijil'],
+    ['reviews', 'Kata pelanggan'], ['stock', 'Stok / tempahan'], ['offer', 'Promosi'], ['demo', 'Yang boleh ditunjuk semasa LIVE'],
+    ['objections', 'Soalan / keraguan pelanggan'], ['productExtra', 'Maklumat penting lain'], ['toVerify', 'Maklumat PERLU SEMAK']]],
+];
+const AFTER_LEAKS = [['improveOne', 'Satu perkara paling penting untuk diperbaiki'], ['goal', 'Apa yang mahu dicapai melalui LIVE'], ['liveExtra', 'Cara buat LIVE']];
+const PLAN = [['nextLiveAt', 'Bila LIVE seterusnya'], ['nextProduct', 'Produk untuk dijual'], ['nextChange', 'Satu perkara untuk dicuba / dibaiki'],
+  ['nextMetric', 'Apa yang akan dikira / dicatat'], ['reviewDate', 'Bila semak hasil'], ['commitNotes', 'Perlu disediakan']];
+const NOTE = 'Penafian AI: Prompt dan output AI adalah draf awal berasaskan input peserta. Semak semua fakta, harga dan dakwaan sebelum digunakan; hasil jualan tidak dijamin.';
+
+// Emoji and other symbols outside the fonts would print as boxes.
+const clean = (s) => String(s ?? '').replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, '').replace(/\r/g, '').replace(/[ \t]{2,}/g, ' ').trim();
+const dateMY = (d) => d.toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kuala_Lumpur' });
+
+export const reportFileName = (data, id) =>
+  `Panduan LIVE · ${clean(data.businessName).replace(/[^\p{L}\p{N} .-]+/gu, '').trim().slice(0, 60) || 'Peserta'} · ${id}.pdf`;
+
+/** Ready when step 1 is filled in and the Master Playbook has been approved. */
+export function reportMissing(data = {}, approvals = {}) {
+  const missing = [];
+  const required = ['owner', 'businessName', 'years', 'model', 'industry', 'team', 'location', 'sales', 'customer', 'age', 'customerNeed'];
+  if (required.some((k) => !String(data[k] ?? '').trim())) missing.push('Profil bisnes belum lengkap');
+  if (!approvals.playbook?.text) missing.push('Panduan LIVE Lengkap (Master Playbook) belum diluluskan');
+  return missing;
+}
+
+export function reportPdf({ participantId, data = {}, approvals = {}, date = new Date() }) {
+  const doc = new PDFDocument({ size: 'A4', bufferPages: true, margins: { top: 50, bottom: 60, left: 52, right: 52 },
+    info: { Title: `Panduan LIVE — ${clean(data.businessName) || 'Peserta'}`, Author: 'Klinik Bisnes SME' } });
+  doc.registerFont('Body', path.join(fonts, 'Inter-Regular.woff'));
+  doc.registerFont('Bold', path.join(fonts, 'Inter-Bold.woff'));
+  doc.registerFont('Display', path.join(fonts, 'BricolageGrotesque-Bold.woff'));
+  const L = doc.page.margins.left, W = doc.page.width - L - doc.page.margins.right;
+  const bottom = () => doc.page.height - doc.page.margins.bottom;
+  const chunks = [];
+  doc.on('data', (c) => chunks.push(c));
+  const finished = new Promise((resolve, reject) => { doc.on('end', () => resolve(Buffer.concat(chunks))); doc.on('error', reject); });
+
+  const room = (h) => { if (doc.y + h > bottom()) doc.addPage(); };
+  const text = (s, { size = 10, font = 'Body', color = C.ink, gap = 4, indent = 0 } = {}) => {
+    doc.font(font).fontSize(size).fillColor(color).text(clean(s) || '—', L + indent, doc.y, { width: W - indent, lineGap: 1.6 });
+    doc.y += gap;
+  };
+  const section = (label, title) => {
+    room(80);
+    doc.y += 12;
+    doc.font('Bold').fontSize(7.5).fillColor(C.red).text(label.toUpperCase(), L, doc.y, { characterSpacing: 1.2, width: W });
+    doc.y += 3;
+    doc.font('Display').fontSize(15).fillColor(C.ink).text(clean(title), L, doc.y, { width: W });
+    doc.moveTo(L, doc.y + 4).lineTo(L + W, doc.y + 4).lineWidth(0.8).strokeColor(C.line).stroke();
+    doc.y += 12;
+  };
+  const field = (label, value) => {
+    const v = clean(value);
+    if (!v) return;
+    room(34);
+    text(label, { size: 8.5, font: 'Bold', color: C.muted, gap: 1 });
+    text(v, { gap: 7 });
+  };
+  // Approved ChatGPT text: light markdown (headings, bold markers, bullets, table rows) made readable.
+  const richText = (raw) => {
+    for (let line of String(raw).replace(/\r/g, '').split('\n')) {
+      if (/^\s*\|?\s*:?-{3,}/.test(line)) continue; // table separator row
+      line = line.replace(/\*\*|__/g, '');
+      const h = line.match(/^\s*#{1,6}\s+(.*)/);
+      if (h) { room(30); doc.y += 4; text(h[1], { font: 'Display', size: 11.5, gap: 3 }); continue; }
+      if (/^\s*\|.*\|\s*$/.test(line)) line = line.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim()).join('   |   ');
+      line = line.replace(/^(\s*)[-*•]\s+/, '$1•  ');
+      if (!line.trim()) { doc.y += 4; continue; }
+      room(16);
+      text(line, { size: 9.5, color: C.text, gap: 1.5, indent: /^\s+•/.test(line) ? 12 : 0 });
+    }
+  };
+  const tickbox = (checked, y) => {
+    doc.roundedRect(L, y + 1, 10, 10, 2).lineWidth(0.9).strokeColor(checked ? C.red : C.muted).stroke();
+    if (checked) doc.moveTo(L + 2, y + 6).lineTo(L + 4.5, y + 8.8).lineTo(L + 8.5, y + 3.2).lineWidth(1.3).strokeColor(C.red).stroke();
+  };
+
+  // Cover: logos on white, nude title band
+  doc.image(LOGOS.klinik, L, 18, { height: 44 });
+  doc.image(LOGOS.rcg, L + W - 55, 18, { fit: [55, 44], align: 'right' });
+  const B = 82;
+  doc.rect(0, B, doc.page.width, 104).fill(C.nude);
+  doc.font('Bold').fontSize(8).fillColor(C.red).text('LIVE LARIS · DARI VIEWERS KE BUYERS', L, B + 20, { characterSpacing: 1.4, width: W });
+  doc.font('Display').fontSize(22).fillColor(C.ink).text('Panduan LIVE Saya', L, B + 35, { width: W });
+  doc.font('Body').fontSize(9.5).fillColor(C.text)
+    .text([clean(data.businessName), clean(data.owner), dateMY(date), participantId].filter(Boolean).join('  ·  '), L, B + 68, { width: W });
+  doc.y = B + 124;
+
+  // 1–3: the participant's answers
+  SECTIONS.forEach(([label, title, fields], i) => {
+    section(label, title);
+    fields.forEach(([k, l]) => field(l, data[k]));
+    if (i !== 1 && !fields.some(([k]) => clean(data[k]))) text('Belum diisi.', { color: C.muted, gap: 6 });
+    if (i === 1) {
+      room(110);
+      text('Kenal Pasti Masalah Semasa LIVE (1 = tiada masalah, 5 = sangat serius)', { size: 8.5, font: 'Bold', color: C.muted, gap: 4 });
+      LEAKS.forEach((n) => {
+        room(16);
+        const y = doc.y, score = clean(data[`leak${n}`]) || '–';
+        doc.font('Body').fontSize(10).fillColor(C.ink).text(LEAK_LABELS[n], L, y, { width: W - 60 });
+        doc.font('Bold').fontSize(10).fillColor(score === '–' ? C.muted : C.ink).text(score === '–' ? '–' : `${score} / 5`, L + W - 50, y, { width: 50, align: 'right' });
+        doc.y = Math.max(doc.y, y + 14) + 2;
+      });
+      doc.y += 5;
+      const metrics = Object.entries(METRICS).filter(([k]) => clean(data[k])).map(([, v]) => v);
+      field('Metrik yang akan direkod', metrics.join(', '));
+      AFTER_LEAKS.forEach(([k, l]) => field(l, data[k]));
+    }
+  });
+
+  // 4: approved materials — the Master Playbook first, then the rest in course order
+  const playbook = CARDS.find((c) => c.id === 'playbook');
+  section('04 · Panduan LIVE lengkap', playbook.title);
+  if (approvals.playbook?.text) richText(approvals.playbook.text);
+  else text('Belum diluluskan.', { color: C.muted });
+  const others = CARDS.filter((c) => c.id !== 'playbook' && approvals[c.id]?.text);
+  if (others.length) {
+    section('05 · Bahan LIVE yang diluluskan', 'Bahan LIVE Anda');
+    others.forEach((c) => {
+      room(60);
+      doc.y += 6;
+      const y = doc.y;
+      doc.rect(L, y, 3, 16).fill(C.red);
+      doc.font('Display').fontSize(12).fillColor(C.ink).text(clean(c.title), L + 10, y + 1, { width: W - 10 });
+      doc.y += 6;
+      richText(approvals[c.id].text);
+    });
+  }
+
+  // 6: quality check and next-LIVE plan
+  section(others.length ? '06 · Komitmen & semakan' : '05 · Komitmen & semakan', 'Panduan LIVE Anda Dah Siap?');
+  const done = QC_ITEMS.filter((_, i) => clean(data[`qc${i}`])).length;
+  text(`Kemajuan semakan: ${done} / ${QC_ITEMS.length} siap`, { size: 9, font: 'Bold', color: C.muted, gap: 6 });
+  QC_ITEMS.forEach((q, i) => {
+    room(18);
+    const y = doc.y;
+    tickbox(Boolean(clean(data[`qc${i}`])), y);
+    doc.font('Body').fontSize(10).fillColor(C.ink).text(q, L + 18, y, { width: W - 18, lineGap: 1.4 });
+    doc.y += 4;
+  });
+  doc.y += 6;
+  room(60);
+  doc.font('Display').fontSize(12.5).fillColor(C.ink).text('Pelan LIVE Saya Seterusnya', L, doc.y, { width: W });
+  doc.y += 6;
+  PLAN.forEach(([k, l]) => field(l, data[k] || 'Belum diisi'));
+
+  // Footer on every page: brand line, disclaimer, page number
+  const range = doc.bufferedPageRange();
+  for (let i = range.start; i < range.start + range.count; i++) {
+    doc.switchToPage(i);
+    doc.page.margins.bottom = 0; // the footer sits in the margin; without this pdfkit starts a new page
+    const y = doc.page.height - 44;
+    doc.font('Bold').fontSize(7).fillColor(C.ink).text('LIVE LARIS AI Builder | Klinik Bisnes SME | Richworks X Academy | powered by RCG', L, y, { width: W - 40, lineBreak: false });
+    doc.font('Body').fontSize(6.5).fillColor(C.muted).text(NOTE, L, y + 10, { width: W - 40 });
+    doc.font('Body').fontSize(7.5).fillColor(C.muted).text(`${i + 1} / ${range.count}`, L + W - 40, y, { width: 40, align: 'right', lineBreak: false });
+  }
+  doc.end();
+  return finished;
+}

@@ -33,6 +33,7 @@ export function appsScriptStore({ url, secret, fetchImpl = fetch, timeoutMs = 60
     loadProfile: (participantId) => rpc('loadProfile', { participantId }),
     saveApproval: (participantId, cardId, text) => rpc('saveApproval', { participantId, cardId, text }),
     logPrompt: (entry) => rpc('logPrompt', { entry }),
+    saveReport: (participantId, base64, name) => rpc('saveReport', { participantId, base64, name }),
   };
 }
 
@@ -44,9 +45,16 @@ export function memoryStore() {
   const profiles = new Map();
   const log = [];
   const answers = [];
+  const reports = new Map();
   return {
     kind: 'memory',
-    profiles, log, answers,
+    profiles, log, answers, reports,
+    async saveReport(id, base64, name) {
+      if (!profiles.has(id)) throw Object.assign(new Error('Profil tidak dijumpai'), { code: 404 });
+      const at = stamp();
+      reports.set(id, { base64, name, at });
+      return { fileId: `memory-${id}`, link: `memory://${encodeURIComponent(name)}`, at };
+    },
     async ping() { return { ok: true } },
     async saveProfile(data) {
       const id = profiles.has(data.participantId) || /^LL-[A-Z0-9]{8}$/.test(data.participantId || '') ? data.participantId : newId();

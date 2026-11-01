@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { cardById, templatePrompt } from '../public/js/cards.mjs';
 import { templateSummary } from './prompt-writer.mjs';
+import { reportPdf, reportMissing, reportFileName } from './report-pdf.mjs';
 
 const publicDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 const ID_RE = /^LL-[A-Z0-9]{8}$/;
@@ -46,6 +47,7 @@ function hourlyLimiter(limit, now) {
 export function createApp({ store, writer, aiLimitPerIpHour = 30, now = Date.now, log = console }) {
   const app = express();
   const allowAi = hourlyLimiter(aiLimitPerIpHour, now);
+  const allowReport = hourlyLimiter(20, now);
   app.set('trust proxy', 1); // Railway sits in front; req.ip is the visitor's address
   app.use(express.json({ limit: '400kb' }));
   app.use(express.static(publicDir));
@@ -96,6 +98,32 @@ export function createApp({ store, writer, aiLimitPerIpHour = 30, now = Date.now
       note: out.reason || '', prompt: out.text,
     }).catch((e) => log.error?.(`[log] ${e.message}`));
     res.json({ text: out.text, source: out.source, reason: out.reason || '' });
+  }));
+
+  // The full report: built from what's saved, downloaded by the participant, and kept in Drive with its link in the Sheet.
+  app.post('/api/report', wrap(async (req, res) => {
+    const participantId = normId(req.body?.participantId);
+    if (!participantId) throw fail(400, 'Simpan profil dahulu.');
+    if (!allowReport(req.ip)) throw fail(429, 'Terlalu banyak permintaan laporan. Cuba lagi sebentar.');
+    const p = await store.loadProfile(participantId);
+    if (!p) throw fail(404, 'Profil tidak dijumpai.');
+    const missing = reportMissing(p.data, p.approvals);
+    if (missing.length) throw fail(409, `Laporan belum boleh disediakan: ${missing.join('; ')}.`);
+    const pdf = await reportPdf({ participantId, data: p.data, approvals: p.approvals });
+    const name = reportFileName(p.data, participantId);
+    let saved = false;
+    try {
+      await store.saveReport(participantId, pdf.toString('base64'), name);
+      saved = true;
+    } catch (e) {
+      log.error?.(`[report] Drive copy for ${participantId} failed: ${e.message}`); // the participant still gets their PDF
+    }
+    res.set({
+      'content-type': 'application/pdf',
+      'content-disposition': `attachment; filename="${name.replace(/[^\x20-\x7e]/g, '-')}"; filename*=UTF-8''${encodeURIComponent(name)}`,
+      'x-report-saved': saved ? '1' : '0',
+    });
+    res.send(pdf);
   }));
 
   app.post('/api/approve', wrap(async (req, res) => {

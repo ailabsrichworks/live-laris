@@ -43,17 +43,27 @@ export function loadAppsScript({ secret = 'test-secret' } = {}) {
   }
 
   const ss = { getName: () => 'klinik bisnes sme', getSheetByName: (n) => sheets[n], insertSheet: (n) => (sheets[n] = mkSheet(n)) };
+  // Drive stand-in: folders and files kept in memory
+  const drive = { files: new Map(), folders: new Map(), seq: 0 };
+  const mkFile = (blob) => { const id = `file${++drive.seq}`; const f = { id, blob, trashed: false, getId: () => id, getUrl: () => `https://drive.google.com/file/d/${id}/view`, setTrashed(t) { f.trashed = t } }; drive.files.set(id, f); return f };
+  const props = new Map();
   const g = {
     SpreadsheetApp: { openById: () => ss, ProtectionType: { RANGE: 'RANGE' } },
     LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
-    Utilities: { formatDate: () => '2026-10-31 18:00:00' },
+    Utilities: { formatDate: () => '2026-10-31 18:00:00', base64Decode: (s) => [...Buffer.from(s, 'base64')], newBlob: (bytes, type, name) => ({ bytes, type, name }) },
+    DriveApp: {
+      createFolder: (name) => { const id = `folder${++drive.seq}`; const folder = { id, name, getId: () => id, createFile: (blob) => mkFile(blob) }; drive.folders.set(id, folder); return folder },
+      getFolderById: (id) => { if (!drive.folders.has(id)) throw new Error('not found'); return drive.folders.get(id) },
+      getFileById: (id) => { if (!drive.files.has(id)) throw new Error('not found'); return drive.files.get(id) },
+    },
+    PropertiesService: { getScriptProperties: () => ({ getProperty: (k) => props.get(k) ?? null, setProperty: (k, v) => props.set(k, v) }) },
     ContentService: { MimeType: { JSON: 'json' }, createTextOutput: (t) => ({ text: t, setMimeType() { return this } }) },
     Logger: { log() {} },
   };
   const names = ['doPost', 'doGet', 'setup', 'PROFILE_HEADERS', 'FORM_KEYS', 'CARD_IDS', 'PROMPT_HEADERS', 'ANSWER_HEADERS'];
   const exported = new Function(...Object.keys(g), `${src}\nreturn { ${names.join(', ')} };`)(...Object.values(g));
   const call = (op, args = {}, s = secret) => JSON.parse(exported.doPost({ postData: { contents: JSON.stringify({ secret: s, op, ...args }) } }).text);
-  return { ...exported, sheets, ss, call, mkSheet };
+  return { ...exported, sheets, ss, call, mkSheet, drive };
 }
 
 /** Field ids of the participant form in public/index.html (plus the generated checklist boxes). */
