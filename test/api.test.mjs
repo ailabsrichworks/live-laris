@@ -111,7 +111,7 @@ test('approves an AI output for a saved participant only', async (t) => {
 });
 
 const FULL = { owner: 'Aina', businessName: 'Sambal Mak Long', years: '1–3 tahun', model: 'Saya tidak pasti', industry: 'Makanan & Minuman',
-  team: 'Saya seorang', location: 'Seluruh Malaysia', sales: 'Bawah RM5,000', customer: 'Ibu bekerja', age: '25–34 tahun', customerNeed: 'Orang sibuk' };
+  team: 'Saya seorang', location: 'Seluruh Malaysia', sales: 'Bawah RM5,000', customer: 'Ibu bekerja', age: '25–34 tahun' };
 
 test('the full report needs a complete profile and an approved Master Playbook', async (t) => {
   const s = await start(); t.after(s.close);

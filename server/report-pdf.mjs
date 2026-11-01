@@ -17,7 +17,7 @@ const SECTIONS = [
   ['01 · Profil bisnes', 'Profil Bisnes', [
     ['owner', 'Nama'], ['businessName', 'Nama bisnes / jenama'], ['years', 'Tempoh berniaga'], ['model', 'Cara berniaga'],
     ['industry', 'Industri'], ['team', 'Saiz team'], ['location', 'Kawasan pelanggan'], ['sales', 'Anggaran jualan sebulan'],
-    ['customer', 'Pelanggan sasaran'], ['age', 'Umur pelanggan'], ['customerNeed', 'Masalah pelanggan yang diselesaikan'],
+    ['customer', 'Pelanggan sasaran'], ['age', 'Umur pelanggan'],
     ['businessDesc', 'Bisnes anda secara ringkas']]],
   ['02 · Reality check', 'LIVE Selling Reality Check', [
     ['platform', 'Platform LIVE'], ['experience', 'Pengalaman LIVE'], ['liveCount30', 'LIVE dalam 30 hari terakhir'],
@@ -25,7 +25,7 @@ const SECTIONS = [
     ['checkout', 'Cara pelanggan membeli']]],
   ['03 · Produk / servis', 'Produk / Servis Anda', [
     ['productType', 'Apa yang dijual'], ['productName', 'Produk / servis untuk LIVE'], ['price', 'Harga jualan'], ['size', 'Saiz / pilihan / pakej'],
-    ['features', 'Ciri atau bahan penting'], ['benefits', 'Manfaat untuk pelanggan'], ['difference', 'Keistimewaan'], ['proof', 'Bukti / sijil'],
+    ['features', 'Ciri atau bahan penting'], ['customerNeed', 'Masalah pelanggan yang diselesaikan'], ['difference', 'Keistimewaan'], ['proof', 'Bukti / sijil'],
     ['reviews', 'Kata pelanggan'], ['stock', 'Stok / tempahan'], ['offer', 'Promosi'], ['demo', 'Yang boleh ditunjuk semasa LIVE'],
     ['objections', 'Soalan / keraguan pelanggan'], ['productExtra', 'Maklumat penting lain'], ['toVerify', 'Maklumat PERLU SEMAK']]],
 ];
@@ -44,7 +44,7 @@ export const reportFileName = (data, id) =>
 /** Ready when step 1 is filled in and the Master Playbook has been approved. */
 export function reportMissing(data = {}, approvals = {}) {
   const missing = [];
-  const required = ['owner', 'businessName', 'years', 'model', 'industry', 'team', 'location', 'sales', 'customer', 'age', 'customerNeed'];
+  const required = ['owner', 'businessName', 'years', 'model', 'industry', 'team', 'location', 'sales', 'customer', 'age'];
   if (required.some((k) => !String(data[k] ?? '').trim())) missing.push('Profil bisnes belum lengkap');
   if (!approvals.playbook?.text) missing.push('Panduan LIVE Lengkap (Master Playbook) belum diluluskan');
   return missing;

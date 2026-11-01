@@ -53,9 +53,9 @@ test('the business summary uses only the step 1 answers, at low effort, with a f
   assert.match(p.messages[0].content, /Nama bisnes: Sambal Mak Long/);
   assert.doesNotMatch(p.messages[0].content, /Lips Serum/, 'only step 1 answers are sent');
 
-  const off = await promptWriter({ model: 'm', log: quiet }).summarize({ data: { businessName: 'Sambal Mak Long', customer: 'Ibu bekerja', location: 'Melaka', customerNeed: 'Orang sibuk nak makan cepat' } });
+  const off = await promptWriter({ model: 'm', log: quiet }).summarize({ data: { businessName: 'Sambal Mak Long', customer: 'Ibu bekerja', location: 'Melaka' } });
   assert.equal(off.source, 'template');
-  assert.equal(off.text, 'Saya menjalankan Sambal Mak Long. Pelanggan sasaran saya ialah Ibu bekerja di Melaka. Orang sibuk nak makan cepat.');
+  assert.equal(off.text, 'Saya menjalankan Sambal Mak Long. Pelanggan sasaran saya ialah Ibu bekerja di Melaka.');
   const refused = await promptWriter({ client: fakeClient({ stop_reason: 'refusal', content: [] }), model: 'm', log: quiet }).summarize({ data: {} });
   assert.equal(refused.source, 'template');
 });
