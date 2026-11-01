@@ -167,6 +167,14 @@ select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;paddin
 .subcard{margin-top:24px;border:1px solid var(--line);border-radius:18px;padding:18px 18px 6px;background:var(--soft)}
 @media(min-width:761px){.subcard{padding:22px 22px 8px}}
 .subcard h3{margin-top:0}
+.mission-title{display:flex;align-items:center;gap:10px}.mission-title svg{width:22px;height:22px;flex:none}
+.mission-lead{font-weight:700;color:var(--ink);margin:4px 0 0}
+.mission-step{border-top:1px solid var(--line);padding:16px 0 14px}
+.mission-step h4{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:16px;color:var(--ink)}.mission-step h4 svg{width:18px;height:18px;flex:none}
+.mission-step .checks{margin-top:10px}
+.mission-box{margin:16px 0 4px;border-radius:14px;background:var(--nude);padding:14px 16px;text-align:center;display:grid;gap:4px}
+.mission-box b{display:inline-flex;align-items:center;justify-content:center;gap:6px;color:var(--ink);font-size:16px}.mission-box b svg{width:18px;height:18px;color:var(--ok)}
+.mission-box span{font-size:14px;color:var(--text)}
 .subcard .leak:last-child{border-bottom:0}
 
 .field-help{margin-top:8px;border:1px solid var(--line);border-radius:12px;background:var(--soft);padding:8px 12px}
@@ -207,6 +215,11 @@ textarea.grow{min-height:48px;resize:none;overflow:hidden}
 <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></g></symbol>
 <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-external" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></g></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V12"/><path d="M12 20V5"/><path d="M19 20v-6"/></g></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3 5 14h6l-1 7 8-11h-6l1-7z"/></g></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></g></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></g></symbol>
 <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 
@@ -353,22 +366,40 @@ textarea.grow{min-height:48px;resize:none;overflow:hidden}
 <div class="qc-progress"><div class="qc-progress-head"><span>Kemajuan semakan</span><b id="qcCount" aria-live="polite">0 / 9 siap</b></div><div class="bar" role="progressbar" aria-label="Kemajuan semakan" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0" id="qcBar"><span id="qcFill"></span></div></div>
 <div class="checks" id="qcList"></div>
 </div>
-<div class="subcard">
-<h3>Pelan LIVE Saya Seterusnya</h3>
-<p class="sub">Rancang LIVE anda yang seterusnya. Pilih satu perkara untuk diperbaiki dan semak hasil selepas LIVE.</p>
+<div class="subcard mission">
+<h3 class="mission-title"><svg aria-hidden="true"><use href="#i-target"/></svg>Misi 7 Hari LIVE Laris</h3>
+<p class="mission-lead">Dari Ilmu Kepada Hasil</p>
+<p class="sub">Anda dah belajar dan siapkan strategi LIVE. Sekarang, cuba satu penambahbaikan dalam masa 7 hari dan lihat perubahan hasil LIVE anda!</p>
+<div class="mission-step">
+<h4><svg aria-hidden="true"><use href="#i-chart"/></svg>1. Hasil LIVE Saya Sebelum Ini</h4>
+<p class="sub">Catat hasil LIVE terakhir sebelum kelas ini supaya kita boleh bandingkan nanti.</p>
 <div class="grid">
-<div class="field"><label for="nextLiveAt">Bila anda akan buat LIVE seterusnya?</label><input id="nextLiveAt" placeholder="Contoh: 5 Nov, 9 malam"></div>
-<div class="field"><label for="nextProduct">Produk apa yang anda nak jual semasa LIVE?</label><input id="nextProduct" placeholder="Contoh: Sambal Goreng Bilis"></div>
-<div class="field full"><label for="nextChange">Apa satu perkara yang anda nak cuba atau baiki?</label><textarea id="nextChange" class="grow" rows="1" placeholder="Contoh: Cuba ayat pembukaan yang baharu"></textarea></div>
-<div class="field full"><label for="nextMetric">Apa yang anda nak kira atau catat selepas LIVE?</label><textarea id="nextMetric" class="grow" rows="1" placeholder="Contoh: Jumlah penonton, pertanyaan dan pesanan"></textarea></div>
-<div class="field full"><label for="reviewDate">Bila anda akan semak hasil LIVE?</label><input id="reviewDate" placeholder="Contoh: 6 Nov, selepas LIVE"></div>
-<div class="field full"><label for="commitNotes">Apa lagi yang anda perlu sediakan? (Jika ada)</label><textarea id="commitNotes" placeholder="Contoh: Sediakan stok, semak pautan pembelian dan lampu LIVE"></textarea></div>
+<div class="field full"><label for="lastLiveAt">Bila LIVE terakhir anda dibuat?</label><input id="lastLiveAt" placeholder="Contoh: 30 Okt, 9 malam"></div>
+<div class="field"><label for="lastViewers">Jumlah viewers</label><input id="lastViewers" inputmode="numeric" placeholder="Contoh: 200"></div>
+<div class="field"><label for="lastOrders">Jumlah pesanan</label><input id="lastOrders" inputmode="numeric" placeholder="Contoh: 2"></div>
+</div>
+<div class="checks"><label><input type="checkbox" id="noLastLive"> Saya tiada rekod LIVE sebelum ini</label></div>
+</div>
+<div class="mission-step">
+<h4><svg aria-hidden="true"><use href="#i-bolt"/></svg>2. Satu Penambahbaikan Saya</h4>
+<div class="field full"><label for="nextChange">Apa SATU teknik baharu yang anda akan cuba semasa LIVE seterusnya?</label><textarea id="nextChange" class="grow" rows="1" placeholder="Contoh: Guna ayat CTA yang lebih jelas supaya viewers tahu cara nak membeli"></textarea></div>
+<div class="checks"><label><input type="checkbox" id="scriptReady"> Skrip LIVE Selling saya sudah siap untuk digunakan</label></div>
+</div>
+<div class="mission-step">
+<h4><svg aria-hidden="true"><use href="#i-calendar"/></svg>3. Misi LIVE Saya Dalam 7 Hari</h4>
+<div class="field full"><label for="nextLiveAt">Bila anda akan buat LIVE menggunakan teknik baharu ini?</label><input id="nextLiveAt" placeholder="Contoh: 5 Nov, 9 malam" aria-describedby="nextLiveAtHelp"><p class="help" id="nextLiveAtHelp">Selepas LIVE, simpan jumlah viewers dan pesanan. Kita akan semak hasil ini bersama!</p></div>
+</div>
+<div class="mission-step">
+<h4><svg aria-hidden="true"><use href="#i-phone"/></svg>4. Semak Hasil Bersama KBSME</h4>
+<p class="sub">Pada hari ke-7, team Klinik Bisnes SME akan hubungi anda melalui survey ringkas atau panggilan untuk semak hasil LIVE terbaru dan lihat perubahan berbanding sebelum ini.</p>
+<div class="checks"><label><input type="checkbox" id="followupConsent"> Saya bersetuju untuk dihubungi bagi semakan hasil 7 hari.</label></div>
+<div class="mission-box"><b><svg aria-hidden="true"><use href="#i-check"/></svg>Misi Anda</b><span>1 Penambahbaikan • 1 LIVE Dalam 7 Hari • 1 Semakan Hasil</span></div>
 </div>
 </div>
 <div class="subcard" id="reportCard">
 <div class="eyebrow">Laporan penuh</div>
 <h3 class="qc-title">Muat Turun Panduan LIVE Anda</h3>
-<p class="sub">Bila semua sudah siap, muat turun laporan penuh (PDF): profil, Reality Check, produk, Panduan LIVE Lengkap, bahan yang diluluskan, semakan dan pelan LIVE seterusnya. Satu salinan juga disimpan untuk penganjur program.</p>
+<p class="sub">Bila semua sudah siap, muat turun laporan penuh (PDF): profil, Reality Check, produk, Panduan LIVE Lengkap, bahan yang diluluskan, semakan dan Misi 7 Hari LIVE Laris. Satu salinan juga disimpan untuk penganjur program.</p>
 <ul class="req" id="reportReqs"></ul>
 <div class="actions" style="margin-top:10px"><button class="btn" id="reportBtn" onclick="downloadReport()" disabled><svg aria-hidden="true"><use href="#i-download"/></svg>Muat Turun Laporan Penuh (PDF)</button></div>
 <div class="status" id="reportStatus" aria-live="polite"></div>

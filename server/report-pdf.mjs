@@ -30,8 +30,10 @@ const SECTIONS = [
     ['objections', 'Soalan / keraguan pelanggan'], ['productExtra', 'Maklumat penting lain'], ['toVerify', 'Maklumat PERLU SEMAK']]],
 ];
 const AFTER_LEAKS = [['goal', 'Apa yang mahu dicapai melalui LIVE'], ['liveExtra', 'Cara buat LIVE']];
-const PLAN = [['nextLiveAt', 'Bila LIVE seterusnya'], ['nextProduct', 'Produk untuk dijual'], ['nextChange', 'Satu perkara untuk dicuba / dibaiki'],
-  ['nextMetric', 'Apa yang akan dikira / dicatat'], ['reviewDate', 'Bila semak hasil'], ['commitNotes', 'Perlu disediakan']];
+// "Misi 7 Hari LIVE Laris"; ticked boxes are stored as '✓'.
+const MISSION = [['lastLiveAt', 'LIVE terakhir sebelum kelas'], ['lastViewers', 'Jumlah viewers'], ['lastOrders', 'Jumlah pesanan'],
+  ['noLastLive', 'Tiada rekod LIVE sebelum ini', 'tick'], ['nextChange', 'Satu teknik baharu untuk dicuba'], ['scriptReady', 'Skrip LIVE Selling siap digunakan', 'tick'],
+  ['nextLiveAt', 'Bila LIVE misi dalam 7 hari'], ['followupConsent', 'Setuju dihubungi untuk semakan hasil 7 hari', 'tick']];
 const NOTE = 'Penafian AI: Prompt dan output AI adalah draf awal berasaskan input peserta. Semak semua fakta, harga dan dakwaan sebelum digunakan; hasil jualan tidak dijamin.';
 
 // Emoji and other symbols outside the fonts would print as boxes.
@@ -206,9 +208,10 @@ export function reportPdf({ participantId, data = {}, approvals = {}, prompts = 
   });
   doc.y += 6;
   room(60);
-  doc.font('Display').fontSize(12.5).fillColor(C.ink).text('Pelan LIVE Saya Seterusnya', L, doc.y, { width: W });
+  doc.font('Display').fontSize(12.5).fillColor(C.ink).text('Misi 7 Hari LIVE Laris', L, doc.y, { width: W });
   doc.y += 6;
-  PLAN.forEach(([k, l]) => field(l, data[k] || 'Belum diisi'));
+  MISSION.forEach(([k, l, tick]) => field(l, tick ? (clean(data[k]) ? 'Ya' : 'Tidak') : data[k] || 'Belum diisi'));
+  field('Misi anda', '1 Penambahbaikan • 1 LIVE Dalam 7 Hari • 1 Semakan Hasil');
 
   // Appendix: the prompt we gave for each approved card, so each answer can be read next to what produced it
   const used = CARDS.filter((c) => approvals[c.id]?.text && prompts[c.name]?.prompt);

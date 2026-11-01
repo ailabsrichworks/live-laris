@@ -94,8 +94,10 @@ export const LABELS = {
   productType: 'Jenis tawaran', productName: 'Produk fokus', price: 'Harga', size: 'Saiz/variasi', features: 'Ciri/bahan/spesifikasi',
   customerNeed: 'Masalah pelanggan yang diselesaikan', proof: 'Bukti/dokumen', difference: 'Perbezaan', reviews: 'Review', stock: 'Stok/kapasiti',
   offer: 'Tawaran/pakej', demo: 'Demo', objections: 'Objection pelanggan', productExtra: 'Cara guna/amaran/polisi', toVerify: 'PERLU SEMAK',
-  nextLiveAt: 'LIVE seterusnya', nextProduct: 'Produk LIVE seterusnya', nextChange: 'Perubahan untuk diuji', nextMetric: 'Metrik direkod',
-  reviewDate: 'Tarikh semak hasil', commitNotes: 'Nota susulan',
+  // Misi 7 Hari LIVE Laris
+  lastLiveAt: 'LIVE terakhir sebelum kelas', lastViewers: 'Viewers LIVE terakhir', lastOrders: 'Pesanan LIVE terakhir',
+  noLastLive: 'Tiada rekod LIVE sebelum ini (✓ = ya)', nextChange: 'Satu teknik baharu untuk dicuba', scriptReady: 'Skrip LIVE siap digunakan (✓ = ya)',
+  nextLiveAt: 'LIVE misi dalam 7 hari', followupConsent: 'Setuju dihubungi KBSME pada hari ke-7 (✓ = ya)',
 };
 
 const v = (d, k) => String(d?.[k] ?? '').trim();

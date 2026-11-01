@@ -54,7 +54,10 @@ const SECTIONS = [
     ['qc4', 'QC · Demo boleh dibuat'], ['qc5', 'QC · Objection tanpa dakwaan'], ['qc6', 'QC · CTA & checkout diuji'],
     ['qc7', 'QC · Follow-up sopan'], ['qc8', 'QC · Feedback diterima'],
     ['nextLiveAt', 'LIVE seterusnya'], ['nextProduct', 'Produk LIVE seterusnya'], ['nextChange', 'Perubahan untuk diuji'],
-    ['nextMetric', 'Metrik direkod'], ['reviewDate', 'Tarikh semak hasil'], ['commitNotes', 'Nota susulan']]],
+    ['nextMetric', 'Metrik direkod'], ['reviewDate', 'Tarikh semak hasil'], ['commitNotes', 'Nota susulan'],
+    // Misi 7 Hari (nextLiveAt and nextChange above are its LIVE date and technique; the other four are kept for older answers)
+    ['lastLiveAt', 'LIVE terakhir sebelum kelas'], ['lastViewers', 'Viewers LIVE terakhir'], ['lastOrders', 'Pesanan LIVE terakhir'],
+    ['noLastLive', 'Tiada rekod LIVE sebelum'], ['scriptReady', 'Skrip LIVE siap'], ['followupConsent', 'Setuju dihubungi hari ke-7']]],
   ['OUTPUT AI DILULUSKAN', '#D9D2E9', [
     ['approved_reality', 'LIVE Reality Check'], ['approved_product', 'Product Intelligence'], ['approved_angles', 'Selling Angles'],
     ['approved_rundown', 'LIVE Rundown'], ['approved_dosdonts', "Do's & Don'ts Reviewer"], ['approved_script', 'Script Builder H.E.B.A.T'],
