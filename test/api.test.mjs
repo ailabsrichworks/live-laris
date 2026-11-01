@@ -80,7 +80,7 @@ test('with the AI off, the template prompt is returned', async (t) => {
   const s = await start({ writer }); t.after(s.close);
   const r = (await s.req('/api/prompt', { card: 'reality', data: {} })).body;
   assert.equal(r.source, 'template');
-  assert.match(r.prompt, /KAD AI: LIVE Reality Check/);
+  assert.match(r.prompt, /^# MODUL 01 – KENAL PASTI MASALAH LIVE ANDA/, 'the module is the template');
 });
 
 test('writes the business summary with the AI and logs it', async (t) => {

@@ -1,12 +1,24 @@
 // LIVE LARIS course content shared by the browser (app.mjs) and the server (prompt-writer.mjs).
 // Cards follow the Trainer Deck sections and the Participant Workbook "AI Prompt Cards".
 // `id` is stable: the Sheet stores each card's approved output under it. `title` and `short` are what participants see; `name` and `task` go to the AI.
+// `module` (optional) is the trainer's full prompt for the card; when present it replaces `task` and its own format and rules win.
+
+import reality from './modules/reality.mjs';
+import product from './modules/product.mjs';
+import angles from './modules/angles.mjs';
+import rundown from './modules/rundown.mjs';
+import dosdonts from './modules/dosdonts.mjs';
+import script from './modules/script.mjs';
+import objection from './modules/objection.mjs';
+import cta from './modules/cta.mjs';
+
+const MODULES = { reality, product, angles, rundown, dosdonts, script, objection, cta };
 
 export const CARDS = [
   { id: 'reality', ref: '01 · Reality Check', name: 'LIVE Reality Check',
     title: "Kenal Pasti Masalah LIVE Anda (Reality Check)",
     short: "Lihat masalah utama dalam LIVE anda dan pilih satu perkara yang perlu dibaiki dahulu.",
-    task: 'Analisis jawapan Reality Check. Kenal pasti titik kebocoran utama (Attention, Retention, Interest, Confidence, Action) berdasarkan keutamaan dan tanda yang diberi, punca berkemungkinan, SATU perkara untuk diperbaiki dahulu dan cara merekod 2 metrik yang dipilih. Bezakan metrik perhatian dan metrik jualan.' },
+    task: 'Analisis jawapan Reality Check. Kenal pasti SATU masalah utama (Attention, Retention, Interest, Confidence, Action) berdasarkan skor dan jawapan, sebab ia diutamakan, dan SATU tindakan kecil untuk LIVE seterusnya.' },
   { id: 'product', ref: '02 · Product & Offer', name: 'Product Intelligence',
     title: "Cara Jual Produk Anda (Product Selling Blueprint)",
     short: "Susun ciri, manfaat, bukti dan 3 cara menerangkan produk kepada pelanggan. Tandakan fakta yang perlu disemak.",
@@ -44,6 +56,8 @@ export const CARDS = [
     short: "Gabungkan bahan yang telah disemak menjadi satu panduan LIVE. Tandakan maklumat yang masih perlu disahkan.",
     task: "Gabungkan menjadi LIVE Selling Playbook lengkap: Product Selling Blueprint; LIVE Rundown 60 Minit; Do's & Don'ts Checklist; 3 Opening Hooks dan skrip lengkap; Product Demonstration Guide; Engagement & Objection Response Bank; CTA, Checkout & Follow-up; Practice Scorecard dan Action Plan. Akhiri dengan Final Quality Check (lengkap / perlu semakan) dan My Next LIVE Commitment. Tandakan semua perkara PERLU SEMAK." },
 ];
+
+for (const c of CARDS) if (MODULES[c.id]) c.module = MODULES[c.id];
 
 export const cardById = (id) => CARDS.find((c) => c.id === id);
 
@@ -116,6 +130,11 @@ export const RULES = `PERATURAN WAJIB:
 /** The fixed prompt, used when the AI prompt writer is off or fails. */
 export function templatePrompt(card, data, approvals) {
   const approved = card.id === 'playbook' ? approvedText(approvals, card.id) : '';
+  if (card.module) return `${card.module}
+
+## MAKLUMAT PESERTA
+Gunakan sebagai FAKTA DIBERIKAN; jangan tanya semula.
+${profileText(data)}${approved ? `\n\n## OUTPUT YANG TELAH DILULUSKAN PESERTA\n${approved}` : ''}`;
   return `ANDA IALAH LIVE LARIS AI BUILDER — pembantu LIVE selling praktikal untuk usahawan mikro dan SME Malaysia, mengikut kursus "LIVE LARIS: Dari Viewers ke Buyers".
 
 PROFIL PESERTA (gunakan sebagai konteks induk; jangan tanya semula):

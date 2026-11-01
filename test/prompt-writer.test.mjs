@@ -73,8 +73,24 @@ test('falls back to the template prompt when Claude is off, refuses, fails or an
     const out = await w.write({ card, data, approvals: {} });
     assert.equal(out.source, 'template');
     assert.equal(out.reason, reason);
-    assert.match(out.prompt, /KAD AI: CTA & Follow-up/);
+    assert.match(out.prompt, /SEKSYEN 08 — AJAK MEMBELI/);
     assert.match(out.prompt, /Produk fokus: Lips Serum/);
   }
   assert.equal(promptWriter({ model: 'm' }).enabled, false);
+});
+
+test("a card with the trainer's module sends the whole module to Claude, and the template keeps it word for word", async () => {
+  const { CARDS, templatePrompt } = await import('../public/js/cards.mjs');
+  assert.deepEqual(CARDS.filter((c) => c.module).map((c) => c.id), ['reality', 'product', 'angles', 'rundown', 'dosdonts', 'script', 'objection', 'cta']);
+  const card = cardById('reality');
+  const client = fakeClient({ stop_reason: 'end_turn', model: 'm', content: [{ type: 'text', text: longPrompt }], usage: {} });
+  await promptWriter({ client, model: 'm', log: quiet }).write({ card, data, approvals: {} });
+  const msg = client.calls[0].messages[0].content;
+  assert.ok(msg.includes(`<modul>\n${card.module}\n</modul>`));
+  assert.match(client.calls[0].system[0].text, /the module wins/);
+
+  const t = templatePrompt(card, data, {});
+  assert.ok(t.startsWith(card.module));
+  assert.match(t, /## MAKLUMAT PESERTA[\s\S]*Produk fokus: Lips Serum/);
+  assert.doesNotMatch(templatePrompt(cardById('rehearsal'), data, {}), /<modul>|## MAKLUMAT PESERTA/, 'cards without a module keep the old template');
 });
