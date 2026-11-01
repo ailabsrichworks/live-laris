@@ -112,7 +112,7 @@ input[type=checkbox]{width:20px;height:20px;min-height:0;padding:0;flex-shrink:0
 .checks label:has(input:checked){border-color:var(--ink);background:var(--nude);box-shadow:inset 0 0 0 1px var(--ink)}
 .checks input{margin-top:2px}
 
-/* AI prompt cards */
+/* Bina Bahan LIVE (section 4 cards) */
 .modules{display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:761px){.modules{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .module{position:relative;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;padding:17px;background:#fff}
@@ -122,7 +122,7 @@ input[type=checkbox]{width:20px;height:20px;min-height:0;padding:0;flex-shrink:0
 .module details{font-size:14px;color:var(--muted);margin:0 0 14px}
 .module summary{cursor:pointer;font-weight:700;color:var(--ink);min-height:32px;display:flex;align-items:center}
 .module details p{font-size:14px;color:var(--muted);margin:6px 0 0}
-.module .btn{margin-top:auto;align-self:flex-start}
+.module .btn{margin-top:auto;align-self:stretch;padding:12px 14px}
 .badge{display:inline-flex;align-items:center;gap:4px;min-height:28px;padding:3px 10px;border-radius:999px;background:var(--nude);color:var(--ink);font-size:13px;font-weight:700;position:absolute;top:14px;right:14px}
 .badge svg{width:14px;height:14px}
 
@@ -172,6 +172,7 @@ select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;paddin
 .example-row{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:4px}
 .example-chip{min-height:40px;background:#fff;border:1px solid var(--field);color:var(--ink);border-radius:999px;padding:8px 14px;font:14px/1.3 var(--font-body);cursor:pointer;text-align:left;transition:border-color .15s,background .15s}
 .example-chip:hover{border-color:var(--ink);background:var(--nude)}
+.subcard .checks{padding-bottom:16px}.subcard .grid{padding-bottom:18px}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -200,7 +201,7 @@ select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;paddin
 <div class="eyebrow">LIVE LARIS · Dari viewers ke buyers</div>
 <h1>Bina LIVE Selling Playbook untuk bisnes anda.</h1>
 <p>Tak pasti apa nak cakap semasa LIVE atau kenapa penonton tak membeli? Bina panduan langkah demi langkah dengan bantuan AI daripada cara perkenalkan produk hingga cara ajak penonton membeli.</p>
-<ol class="steps" aria-label="Aliran sesi"><li>01 Profil</li><li>02 Reality Check</li><li>03 Blueprint</li><li>04 AI Prompt Cards</li><li>05 Komitmen</li><li>06 Playbook</li></ol>
+<ol class="steps" aria-label="Aliran sesi"><li>01 Profil</li><li>02 Reality Check</li><li>03 Blueprint</li><li>04 Bina Bahan LIVE</li><li>05 Playbook</li><li>06 Komitmen</li></ol>
 </section>
 
 <div class="progress"><div class="bar" role="progressbar" aria-label="Kemajuan keseluruhan" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar"><span id="progressFill"></span></div><span id="progressText"><b>0%</b> lengkap</span></div>
@@ -209,9 +210,9 @@ select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;paddin
 <button class="active" data-tab="business"><span class="caticon"><svg aria-hidden="true"><use href="#i-profile"/></svg></span><span class="navtext"><strong>01 · Profil Bisnes</strong><span class="step-status" id="st-business"></span></span></button>
 <button data-tab="reality"><span class="caticon"><svg aria-hidden="true"><use href="#i-sales"/></svg></span><span class="navtext"><strong>02 · LIVE Reality Check</strong><span class="step-status" id="st-reality"></span></span></button>
 <button data-tab="product"><span class="caticon"><svg aria-hidden="true"><use href="#i-box"/></svg></span><span class="navtext"><strong>03 · Product Blueprint</strong><span class="step-status" id="st-product"></span></span></button>
-<button data-tab="tools"><span class="caticon"><svg aria-hidden="true"><use href="#i-sparkle"/></svg></span><span class="navtext"><strong>04 · AI Prompt Cards</strong><span class="step-status" id="st-tools"></span></span></button>
-<button data-tab="commit"><span class="caticon"><svg aria-hidden="true"><use href="#i-checklist"/></svg></span><span class="navtext"><strong>05 · Komitmen &amp; Semakan</strong><span class="step-status" id="st-commit"></span></span></button>
-<button data-tab="playbook"><span class="caticon"><svg aria-hidden="true"><use href="#i-book"/></svg></span><span class="navtext"><strong>06 · Master Playbook</strong><span class="step-status" id="st-playbook"></span></span></button>
+<button data-tab="tools"><span class="caticon"><svg aria-hidden="true"><use href="#i-sparkle"/></svg></span><span class="navtext"><strong>04 · Bina Bahan LIVE</strong><span class="step-status" id="st-tools"></span></span></button>
+<button data-tab="playbook"><span class="caticon"><svg aria-hidden="true"><use href="#i-book"/></svg></span><span class="navtext"><strong>05 · Master Playbook</strong><span class="step-status" id="st-playbook"></span></span></button>
+<button data-tab="commit"><span class="caticon"><svg aria-hidden="true"><use href="#i-checklist"/></svg></span><span class="navtext"><strong>06 · Komitmen &amp; Semakan</strong><span class="step-status" id="st-commit"></span></span></button>
 <button class="newprofile" onclick="newProfile()"><svg aria-hidden="true"><use href="#i-refresh"/></svg>Mula profil baru</button>
 </nav>
 <main>
@@ -305,36 +306,22 @@ select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;paddin
 <div class="field full"><label for="productExtra">Maklumat penting lain (jika ada)</label><textarea id="productExtra" placeholder="Contoh: Cara simpan, cara guna, maklumat penghantaran atau amaran label."></textarea></div>
 <div class="field full"><label for="toVerify">Maklumat PERLU SEMAK</label><textarea id="toVerify" placeholder="Senaraikan fakta yang belum disahkan: harga, sijil, dakwaan, stok, syarat promosi…"></textarea></div>
 </div>
-<div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Blueprint</button><button class="btn light" onclick="next('tools')">Pergi ke AI Prompt Cards →</button></div><div class="status sync"></div>
+<div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Blueprint</button><button class="btn light" onclick="next('tools')">Seterusnya: Bina Bahan LIVE →</button></div><div class="status sync"></div>
 </section>
 
 <section id="tools" class="panel hidden">
-<div class="label">Langkah 04 · AI prompt cards</div>
-<h2>AI Prompt Cards</h2><p class="sub">Ikut susunan kelas. Klik kad dan AI akan menulis prompt khusus untuk bisnes anda berdasarkan profil, Reality Check dan Blueprint.</p>
-<div class="note">Cara guna: klik “Jana prompt AI”, salin prompt ke ChatGPT, semak hasilnya, kemudian tampal &amp; luluskan. AI tidak boleh mengesahkan fakta produk bagi pihak anda.</div>
+<div class="label">Langkah 04 · Bina bahan LIVE</div>
+<h2>Bina Bahan LIVE</h2><p class="sub">Pilih bahan yang anda mahu sediakan untuk LIVE. Setiap bahan akan menggunakan maklumat bisnes anda.</p>
+<div class="note">Cara guna: pilih bahan di bawah, klik “Sediakan Arahan ChatGPT”, kemudian salin dan tampal arahan itu ke ChatGPT. Jika ada maklumat yang belum lengkap, semak dahulu draf yang terhasil. Selepas itu, tampal jawapan ChatGPT dan klik <b>Lulus</b> supaya ia masuk ke Panduan LIVE Lengkap.</div>
 <div class="modules" id="moduleGrid"></div>
+<div class="actions"><button class="btn gen-btn" onclick="makePrompt('playbook')">Sediakan Arahan Panduan LIVE Lengkap</button><button class="btn light" onclick="next('playbook')">Lihat Arahan Terakhir →</button></div>
 </section>
 
-<section id="commit" class="panel hidden">
-<div class="label">Langkah 05 · Komitmen &amp; semakan</div>
-<h2>Final Playbook Quality Check</h2><p class="sub">Sebelum pulang, tandakan setiap item yang sudah lengkap.</p>
-<div class="checks" id="qcList"></div>
-<h3>My Next LIVE Commitment</h3>
-<div class="grid">
-<div class="field"><label for="nextLiveAt">Tarikh dan masa LIVE seterusnya</label><input id="nextLiveAt" placeholder="Contoh: Rabu 9 malam"></div>
-<div class="field"><label for="nextProduct">Produk yang akan difokuskan</label><input id="nextProduct"></div>
-<div class="field"><label for="nextChange">Satu perubahan yang akan diuji</label><input id="nextChange" placeholder="Contoh: uji 2 opening hooks"></div>
-<div class="field"><label for="nextMetric">Metrik yang akan direkod</label><input id="nextMetric" placeholder="Contoh: pertanyaan dan pesanan"></div>
-<div class="field"><label for="reviewDate">Tarikh semak hasil LIVE</label><input id="reviewDate"></div>
-<div class="field full"><label for="commitNotes">Nota / tindakan susulan</label><textarea id="commitNotes"></textarea></div>
-</div>
-<div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Komitmen</button><button class="btn red gen-btn" onclick="makePrompt('playbook')">Jana Master Playbook →</button></div><div class="status sync"></div>
-</section>
 
 <section id="playbook" class="panel hidden">
-<div class="label">Langkah 06 · Master playbook</div>
+<div class="label">Langkah 05 · Master playbook</div>
 <h2>Prompt Workspace</h2><p class="sub">AI menulis prompt khusus berdasarkan jawapan anda. Salin ke ChatGPT, kemudian tampal jawapannya di bawah untuk diluluskan.</p>
-<div id="promptSource" class="source" aria-live="polite"></div><div id="promptBox" class="output" aria-live="polite">Pilih mana-mana AI Prompt Card untuk membina arahan.</div>
+<div id="promptSource" class="source" aria-live="polite"></div><div id="promptBox" class="output" aria-live="polite">Pilih bahan di Langkah 04 untuk sediakan arahan ChatGPT.</div>
 <div class="actions"><button class="btn" onclick="copyPrompt()"><svg aria-hidden="true"><use href="#i-copy"/></svg>Salin Prompt</button><button class="btn light" onclick="downloadProfile()"><svg aria-hidden="true"><use href="#i-download"/></svg>Muat Turun Profil (.txt)</button><button class="btn gold" onclick="openChatGPT()"><svg aria-hidden="true"><use href="#i-external"/></svg>Buka ChatGPT</button></div>
 <div id="copyStatus" class="status" aria-live="polite"></div>
 <div id="approveBox" class="approve">
@@ -345,6 +332,29 @@ select.score{width:auto;min-width:104px;flex-shrink:0;border-radius:999px;paddin
 <div id="approvedList"></div>
 </div>
 <div class="note">Keselamatan data: profil disimpan ke Google Sheet penganjur program dan dalam browser ini. Jangan masukkan maklumat sensitif pelanggan atau dokumen sulit.</div>
+<div class="actions"><button class="btn light" onclick="next('commit')">Seterusnya: Komitmen &amp; Semakan →</button></div>
+</section>
+<section id="commit" class="panel hidden">
+<div class="label">Langkah 06 · Komitmen &amp; semakan</div>
+<h2>Komitmen &amp; Semakan</h2><p class="sub">Semak playbook anda, kemudian tetapkan tindakan untuk LIVE seterusnya.</p>
+<div class="subcard">
+<h3>Final Playbook Quality Check</h3>
+<p class="sub">Sebelum pulang, tandakan setiap item yang sudah lengkap.</p>
+<div class="checks" id="qcList"></div>
+</div>
+<div class="subcard">
+<h3>My Next LIVE Commitment</h3>
+<p class="sub">Tukar hasil kelas kepada satu tindakan yang mempunyai tarikh.</p>
+<div class="grid">
+<div class="field"><label for="nextLiveAt">Tarikh dan masa LIVE seterusnya</label><input id="nextLiveAt" placeholder="Contoh: Rabu 9 malam"></div>
+<div class="field"><label for="nextProduct">Produk yang akan difokuskan</label><input id="nextProduct"></div>
+<div class="field"><label for="nextChange">Satu perubahan yang akan diuji</label><input id="nextChange" placeholder="Contoh: uji 2 opening hooks"></div>
+<div class="field"><label for="nextMetric">Metrik yang akan direkod</label><input id="nextMetric" placeholder="Contoh: pertanyaan dan pesanan"></div>
+<div class="field"><label for="reviewDate">Tarikh semak hasil LIVE</label><input id="reviewDate"></div>
+<div class="field full"><label for="commitNotes">Nota / tindakan susulan</label><textarea id="commitNotes"></textarea></div>
+</div>
+</div>
+<div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Komitmen</button><button class="btn red gen-btn" onclick="makePrompt('playbook')">Jana Master Playbook →</button></div><div class="status sync"></div>
 </section>
 </main></div>
 <footer class="footer"><p class="footer-brand">LIVE LARIS AI Builder | Klinik Bisnes SME | Richworks X Academy | powered by RCG</p><p><b>Penafian AI:</b> Prompt dan output AI adalah draf awal berasaskan input anda. Semak semua fakta, harga dan dakwaan sebelum digunakan; hasil jualan tidak dijamin.</p></footer>

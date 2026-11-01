@@ -139,9 +139,9 @@ async function makePrompt(idOrName) {
   setGenerating(true);
   $('promptBox').classList.add('loading');
   $('promptBox').innerHTML = '<span class="spinner" aria-hidden="true"></span><span></span>';
-  $('promptBox').lastChild.textContent = 'AI sedang menulis prompt khusus untuk ' + card.name + '… (10–30 saat)';
+  $('promptBox').lastChild.textContent = 'AI sedang menyediakan arahan untuk ' + card.title + '… (10–30 saat)';
   $('promptSource').textContent = ''; $('promptSource').className = 'source'; $('copyStatus').textContent = '';
-  $('approveLabel').textContent = 'Jawapan AI untuk: ' + card.name;
+  $('approveLabel').textContent = 'Jawapan ChatGPT untuk: ' + card.title;
   $('aiOutput').value = approvals[card.id]?.text || '';
   await saveProfile(true);
   try {
@@ -152,7 +152,7 @@ async function makePrompt(idOrName) {
     $('promptSource').className = 'source' + (ai ? ' ai' : '');
     $('promptSource').innerHTML = (ai ? ICON.sparkle : ICON.info) + '<span></span>';
     $('promptSource').lastChild.textContent = ai ? 'Prompt ditulis khusus oleh AI untuk bisnes anda.' : 'Prompt standard digunakan' + (r.reason ? ' (' + r.reason + ')' : '') + '.';
-    $('copyStatus').textContent = 'Prompt ' + card.name + ' sedia. Klik Salin Prompt.';
+    $('copyStatus').textContent = 'Arahan untuk ' + card.title + ' sudah siap. Klik Salin Prompt.';
   } catch (err) {
     $('promptBox').classList.remove('loading');
     $('promptBox').textContent = 'Gagal menjana prompt: ' + err.message + '. Cuba klik kad sekali lagi.';
@@ -167,16 +167,16 @@ async function approveOutput() {
   try {
     const r = await api('/api/approve', { participantId, card: currentCard.id, text: t });
     approvals[currentCard.id] = { text: t, at: r.at }; saveApprovals(); renderApprovals(); renderModules(); updateProgress();
-    $('copyStatus').textContent = '✓ ' + currentCard.name + ' diluluskan dan disimpan. Ia akan dimasukkan ke Master Playbook.';
+    $('copyStatus').textContent = '✓ ' + currentCard.title + ' diluluskan dan disimpan. Ia akan dimasukkan ke Panduan LIVE Lengkap.';
   } catch (err) { alert('Gagal meluluskan: ' + err.message) }
 }
 function renderApprovals() {
   const list = CARDS.filter((c) => approvals[c.id]);
-  $('approvedList').innerHTML = list.length ? `<h3 style="margin-top:16px">Output diluluskan (${list.length}/${CARDS.length})</h3>` + list.map((c) => `<details class="approved"><summary>✓ ${c.name}${approvals[c.id].at ? ' · ' + approvals[c.id].at : ''}</summary><pre></pre></details>`).join('') : '';
+  $('approvedList').innerHTML = list.length ? `<h3 style="margin-top:16px">Output diluluskan (${list.length}/${CARDS.length})</h3>` + list.map((c) => `<details class="approved"><summary>✓ ${c.title}${approvals[c.id].at ? ' · ' + approvals[c.id].at : ''}</summary><pre></pre></details>`).join('') : '';
   $('approvedList').querySelectorAll('pre').forEach((p, i) => (p.textContent = approvals[list[i].id].text));
 }
 function renderModules() {
-  $('moduleGrid').innerHTML = CARDS.map((c, i) => `<article class="module">${approvals[c.id] ? `<span class="badge">${ICON.check}Diluluskan</span>` : ''}<div class="ref">${c.ref.toUpperCase()}</div><h3>${String(i + 1).padStart(2, '0')} · ${c.name}</h3><p>${c.short}</p><details><summary>Lihat tugas penuh</summary><p>${c.task}</p></details><button class="btn gen-btn ${c.id === 'playbook' ? 'red' : 'light'}" onclick="makePrompt('${c.id}')"${generating ? ' disabled' : ''}>Jana prompt AI ${ICON.arrow}</button></article>`).join('');
+  $('moduleGrid').innerHTML = CARDS.map((c, i) => `<article class="module">${approvals[c.id] ? `<span class="badge">${ICON.check}Diluluskan</span>` : ''}<div class="ref">${c.ref.toUpperCase()}</div><h3>${String(i + 1).padStart(2, '0')} · ${c.title}</h3><p>${c.short}</p><button class="btn gen-btn ${c.id === 'playbook' ? 'red' : 'light'}" onclick="makePrompt('${c.id}')"${generating ? ' disabled' : ''}>Sediakan Arahan ChatGPT ${ICON.arrow}</button></article>`).join('');
 }
 
 // Progress: answered fields per step, approved cards for the AI step.
