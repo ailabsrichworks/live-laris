@@ -302,16 +302,24 @@ function updateProgress() {
 }
 // ---- Full report (PDF): ready once step 1 is complete and the Master Playbook is approved ----
 let reporting = false;
+// "Tahniah! Anda berjaya" card: the three required items unlock the download; the checklist is encouraged.
 function updateReportCard(qcDone) {
   const reqs = [
-    [missingProfile().length === 0, 'Profil bisnes lengkap', true],
-    [Boolean($('customerNeed').value.trim()), 'Masalah pelanggan diisi (Product Blueprint)', true],
-    [Boolean(approvals.playbook), 'Panduan LIVE Lengkap (Master Playbook) diluluskan', true],
-    [qcDone === QC_ITEMS.length, `Semakan ${qcDone} / ${QC_ITEMS.length} siap`, false],
+    [missingProfile().length === 0, 'Profil bisnes dan pelanggan sasaran', true],
+    [Boolean($('customerNeed').value.trim()), 'Masalah pelanggan dan fokus produk', true],
+    [Boolean(approvals.playbook), 'LIVE Selling Playbook yang telah disemak', true],
+    [qcDone === QC_ITEMS.length, 'Persediaan untuk LIVE seterusnya', false],
   ];
+  const ready = reqs.every(([ok, , required]) => ok || !required);
+  $('reportCard').classList.toggle('ready', ready);
+  $('reportEyebrow').textContent = ready ? 'Tahniah! Anda berjaya' : 'Langkah terakhir';
+  $('reportTitle').textContent = ready ? 'LIVE Selling Playbook Anda Dah Siap!' : 'LIVE Selling Playbook Anda Hampir Siap';
+  $('reportLead').textContent = ready
+    ? 'Bukan sekadar belajar cara LIVE. Anda kini dah bina LIVE Selling Playbook sendiri yang boleh terus digunakan untuk sesi LIVE seterusnya.'
+    : 'Lengkapkan tiga perkara pertama di bawah untuk muat turun LIVE Selling Playbook anda.';
   $('reportReqs').innerHTML = reqs.map(([ok, label, required]) =>
-    `<li class="${ok ? 'ok' : ''}"><span class="dot">${ok ? ICON.check : ''}</span><span>${label}${required ? '' : ' <small>(digalakkan)</small>'}</span></li>`).join('');
-  $('reportBtn').disabled = reporting || !reqs.every(([ok, , required]) => ok || !required);
+    `<li class="${ok ? 'ok' : ''}"><svg aria-hidden="true"><use href="#i-check-circle"/></svg><span>${label}${ok || required ? '' : ` <small>(digalakkan · semakan ${qcDone} / ${QC_ITEMS.length})</small>`}</span></li>`).join('');
+  $('reportBtn').disabled = reporting || !ready;
 }
 async function downloadReport() {
   if (reporting) return;
