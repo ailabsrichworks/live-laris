@@ -99,6 +99,19 @@ async function ensureSummary(force) {
   } finally { summarising = false; $('summaryBtn').disabled = false }
 }
 
+// Boxes with a long example (textarea.grow) are as tall as their text, or the example while empty, so nothing is cut off.
+function grow(el) {
+  if (!el.offsetParent) return; // hidden step: sized when it opens
+  el.style.height = 'auto';
+  let h = el.scrollHeight;
+  if (!el.value && el.placeholder) { el.value = el.placeholder; h = el.scrollHeight; el.value = '' }
+  el.style.height = h + 2 + 'px'; // + border
+}
+const growAll = () => document.querySelectorAll('textarea.grow').forEach(grow);
+document.querySelectorAll('textarea.grow').forEach((el) => el.addEventListener('input', () => grow(el)));
+window.addEventListener('resize', growAll);
+document.fonts?.ready.then(growAll); // web fonts change line widths
+
 // Platform LIVE: several tick boxes, saved together as one comma-separated value in #platform.
 const platformBoxes = () => document.querySelectorAll('input[name="platformOpt"]');
 function platformToValue() {
@@ -253,6 +266,7 @@ function next(id, scroll = true) {
   currentStep = id;
   document.querySelectorAll('main section').forEach((s) => s.classList.toggle('hidden', s.id !== id));
   document.querySelectorAll('nav button[data-tab]').forEach((b) => { const on = b.dataset.tab === id; b.classList.toggle('active', on); if (on) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current') });
+  growAll();
   // Land on the step itself (below the hero), not the top of the page.
   if (scroll) window.scrollTo({ top: Math.max(0, document.querySelector('.progress').getBoundingClientRect().top + window.scrollY - 12) });
 }
