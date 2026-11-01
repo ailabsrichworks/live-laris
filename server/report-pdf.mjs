@@ -40,8 +40,9 @@ const NOTE = 'Penafian AI: Prompt dan output AI adalah draf awal berasaskan inpu
 const clean = (s) => String(s ?? '').replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, '').replace(/\r/g, '').replace(/[ \t]{2,}/g, ' ').trim();
 const dateMY = (d) => d.toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kuala_Lumpur' });
 
+// The participant's download has no code; the organiser's Drive copy adds it so same-named businesses don't clash.
 export const reportFileName = (data, id) =>
-  `Panduan LIVE · ${clean(data.businessName).replace(/[^\p{L}\p{N} .-]+/gu, '').trim().slice(0, 60) || 'Peserta'} · ${id}.pdf`;
+  `Panduan LIVE · ${clean(data.businessName).replace(/[^\p{L}\p{N} .-]+/gu, '').trim().slice(0, 60) || 'Peserta'}${id ? ` · ${id}` : ''}.pdf`;
 
 /** Ready when step 1 and the customer problem are filled in and the Master Playbook has been approved. */
 export function reportMissing(data = {}, approvals = {}) {
@@ -53,8 +54,7 @@ export function reportMissing(data = {}, approvals = {}) {
   return missing;
 }
 
-/** prompts: card name → { prompt, at } (the latest prompt we gave for each card, from the Prompt Log). */
-export function reportPdf({ participantId, data = {}, approvals = {}, prompts = {}, date = new Date() }) {
+export function reportPdf({ participantId, data = {}, approvals = {}, date = new Date() }) {
   const doc = new PDFDocument({ size: 'A4', bufferPages: true, margins: { top: 50, bottom: 60, left: 52, right: 52 },
     info: { Title: `Panduan LIVE — ${clean(data.businessName) || 'Peserta'}`, Author: 'Klinik Bisnes SME' } });
   doc.registerFont('Body', path.join(fonts, 'Inter-Regular.woff'));
@@ -212,29 +212,6 @@ export function reportPdf({ participantId, data = {}, approvals = {}, prompts = 
   doc.y += 6;
   MISSION.forEach(([k, l, tick]) => field(l, tick ? (clean(data[k]) ? 'Ya' : 'Tidak') : data[k] || 'Belum diisi'));
   field('Misi anda', '1 Penambahbaikan • 1 LIVE Dalam 7 Hari • 1 Semakan Hasil');
-
-  // Appendix: the prompt we gave for each approved card, so each answer can be read next to what produced it
-  const used = CARDS.filter((c) => approvals[c.id]?.text && prompts[c.name]?.prompt);
-  if (used.length) {
-    doc.addPage();
-    section('Lampiran', 'Arahan ChatGPT yang digunakan');
-    text('Arahan (prompt) terakhir yang AI tulis untuk setiap bahan yang anda luluskan. Gunakan semula jika mahu kemas kini bahan dengan maklumat baharu.', { size: 9, color: C.muted, gap: 8 });
-    used.forEach((c) => {
-      room(70);
-      doc.y += 6;
-      const y = doc.y;
-      doc.rect(L, y, 3, 16).fill(C.red);
-      doc.font('Display').fontSize(11.5).fillColor(C.ink).text(clean(c.title), L + 10, y + 1, { width: W - 10 });
-      if (prompts[c.name].at) text(`Dijana: ${prompts[c.name].at}`, { size: 7.5, color: C.muted, gap: 3, indent: 10 });
-      doc.y += 2;
-      for (const line of String(prompts[c.name].prompt).replace(/\r/g, '').split('\n')) {
-        if (!line.trim()) { doc.y += 3; continue; }
-        room(14);
-        text(line, { size: 8.5, color: C.text, gap: 1 });
-      }
-      doc.y += 6;
-    });
-  }
 
   // Footer on every page: brand line, disclaimer, page number
   const range = doc.bufferedPageRange();

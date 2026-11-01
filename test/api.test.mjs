@@ -161,7 +161,8 @@ test('downloads the full report as a PDF and keeps a copy', async (t) => {
   assert.equal(res.status, 200);
   assert.equal(res.headers.get('content-type'), 'application/pdf');
   assert.equal(res.headers.get('x-report-saved'), '1');
-  assert.match(decodeURIComponent(res.headers.get('content-disposition')), /Panduan LIVE · Sambal Mak Long · LL-/);
+  assert.match(decodeURIComponent(res.headers.get('content-disposition')), /filename\*=UTF-8''Panduan LIVE · Sambal Mak Long\.pdf$/, 'no participant code in the download name');
+  assert.equal(s.store.reports.get(participantId).name, `Panduan LIVE · Sambal Mak Long · ${participantId}.pdf`, 'the Drive copy keeps the code');
   const pdf = Buffer.from(await res.arrayBuffer());
   assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
   assert.equal(Buffer.from(s.store.reports.get(participantId).base64, 'base64').length, pdf.length, 'the stored copy is the same file');
@@ -177,20 +178,17 @@ test('if the Drive copy fails, the participant still gets the PDF', async (t) =>
   assert.equal(res.headers.get('x-report-saved'), '0');
 });
 
-test('the report includes the prompts we gave for approved cards, and still works without them', async (t) => {
+test('the report has no prompt appendix', async (t) => {
   const s = await start(); t.after(s.close);
   const { participantId } = (await s.req('/api/profile', { data: FULL })).body;
   await s.req('/api/prompt', { participantId, card: 'rundown', data: FULL }); // logs "AI PROMPT rundown"
   await new Promise((r) => setImmediate(r));
   await s.req('/api/approve', { participantId, card: 'rundown', text: 'RUNDOWN' });
   await s.req('/api/approve', { participantId, card: 'playbook', text: 'Panduan' });
-  const pages = async () => {
-    const res = await fetch(`${s.base}/api/report`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ participantId }) });
-    assert.equal(res.status, 200);
-    return (Buffer.from(await res.arrayBuffer()).toString('latin1').match(/\/Type \/Page[^s]/g) || []).length;
-  };
-  const withPrompts = await pages();
-  s.store.getPrompts = async () => { throw new Error('Sheet down') };
-  const without = await pages();
-  assert.equal(withPrompts, without + 1, 'the appendix adds a page; without prompts the report still downloads');
+  const res = await fetch(`${s.base}/api/report`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ participantId }) });
+  assert.equal(res.status, 200);
+  const { reportPdf } = await import('../server/report-pdf.mjs');
+  const pages = (b) => (b.toString('latin1').match(/\/Type \/Page[^s]/g) || []).length;
+  const loaded = (await s.req('/api/profile/' + participantId)).body;
+  assert.equal(pages(Buffer.from(await res.arrayBuffer())), pages(await reportPdf({ participantId, data: loaded.data, approvals: loaded.approvals })), 'the logged prompt adds nothing');
 });
