@@ -40,6 +40,25 @@ test('the Master Playbook card includes approved outputs', async () => {
   assert.match(client.calls[0].messages[0].content, /<output_diluluskan>[\s\S]*--- Script Builder H\.E\.B\.A\.T ---\nSKRIP/);
 });
 
+test('the business summary uses only the step 1 answers, at low effort, with a fallback', async () => {
+  const client = fakeClient({ stop_reason: 'end_turn', model: 'claude-sonnet-5-5', content: [{ type: 'text', text: 'Saya menjual sambal siap makan untuk ibu bekerja.' }] });
+  const w = promptWriter({ client, model: 'claude-sonnet-5-5', log: quiet });
+  const out = await w.summarize({ data: { businessName: 'Sambal Mak Long', customer: 'Ibu bekerja', productName: 'Lips Serum' } });
+  assert.equal(out.source, 'ai');
+  assert.equal(out.text, 'Saya menjual sambal siap makan untuk ibu bekerja.');
+  const p = client.calls[0];
+  assert.deepEqual(p.output_config, { effort: 'low' });
+  assert.equal(p.fallbacks, 'default');
+  assert.match(p.messages[0].content, /Nama bisnes: Sambal Mak Long/);
+  assert.doesNotMatch(p.messages[0].content, /Lips Serum/, 'only step 1 answers are sent');
+
+  const off = await promptWriter({ model: 'm', log: quiet }).summarize({ data: { businessName: 'Sambal Mak Long', customer: 'Ibu bekerja', location: 'Melaka', customerNeed: 'Orang sibuk nak makan cepat' } });
+  assert.equal(off.source, 'template');
+  assert.equal(off.text, 'Saya menjalankan Sambal Mak Long. Pelanggan sasaran saya ialah Ibu bekerja di Melaka. Orang sibuk nak makan cepat.');
+  const refused = await promptWriter({ client: fakeClient({ stop_reason: 'refusal', content: [] }), model: 'm', log: quiet }).summarize({ data: {} });
+  assert.equal(refused.source, 'template');
+});
+
 test('falls back to the template prompt when Claude is off, refuses, fails or answers too little', async () => {
   const card = cardById('cta');
   const cases = [

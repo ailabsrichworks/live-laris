@@ -44,6 +44,61 @@ function saveProfile(silent) {
     .finally(() => { saving = null; document.querySelectorAll('.btn.save').forEach((b) => (b.disabled = false)) });
   return saving;
 }
+// ---- Step 1 is mandatory (except the AI-written summary) ----
+const REQUIRED = [...document.querySelectorAll('#business [data-required]')].map((e) => e.id);
+const missingProfile = () => REQUIRED.filter((id) => !$(id).value.trim());
+function markField(id, bad) {
+  const el = $(id), errId = 'err-' + id;
+  let msg = $(errId);
+  el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  const described = (el.getAttribute('aria-describedby') || '').split(' ').filter((x) => x && x !== errId);
+  if (bad && !msg) {
+    msg = document.createElement('p'); msg.className = 'field-error'; msg.id = errId; msg.textContent = 'Wajib diisi.';
+    el.closest('.field').appendChild(msg);
+  }
+  if (!bad && msg) msg.remove();
+  el.setAttribute('aria-describedby', (bad ? [...described, errId] : described).join(' '));
+  if (!el.getAttribute('aria-describedby')) el.removeAttribute('aria-describedby');
+}
+/** True when step 1 is complete; otherwise flags the missing fields and focuses the first one. */
+function checkProfile() {
+  const missing = missingProfile();
+  REQUIRED.forEach((id) => markField(id, missing.includes(id)));
+  if (missing.length) {
+    setStatus(`Sila lengkapkan ${missing.length} ruangan wajib (*) sebelum ke langkah seterusnya.`, 'err');
+    $(missing[0]).focus({ preventScroll: true });
+    $(missing[0]).scrollIntoView({ block: 'center' });
+    return false;
+  }
+  return true;
+}
+function saveBusiness() {
+  saveProfile(false);
+  if (checkProfile()) ensureSummary(false);
+}
+function nextFromBusiness() {
+  if (!checkProfile()) return;
+  ensureSummary(false);
+  next('reality');
+}
+
+// ---- "Bisnes anda secara ringkas": written by the AI from the step 1 answers ----
+let summarising = false;
+async function ensureSummary(force) {
+  if (summarising || (!force && $('businessDesc').value.trim())) return;
+  if (missingProfile().length) { if (force) checkProfile(); return }
+  summarising = true; $('summaryBtn').disabled = true;
+  $('summaryStatus').textContent = 'AI sedang menulis ringkasan bisnes anda…';
+  try {
+    const r = await api('/api/summary', { participantId, data: collect() });
+    $('businessDesc').value = r.text;
+    $('businessDesc').dispatchEvent(new Event('change')); // autosave + progress
+    $('summaryStatus').textContent = r.source === 'ai' ? 'Ringkasan ditulis oleh AI. Anda boleh ubah jika perlu.' : 'Ringkasan asas digunakan' + (r.reason ? ' (' + r.reason + ')' : '') + '. Anda boleh ubah jika perlu.';
+  } catch (err) {
+    $('summaryStatus').textContent = 'Gagal menulis ringkasan: ' + err.message + '. Cuba klik “Tulis semula dengan AI”.';
+  } finally { summarising = false; $('summaryBtn').disabled = false }
+}
+
 function loadCached() { try { fill(JSON.parse(store.get(CACHE_KEY) || '{}')) } catch { /* corrupt cache */ } setPid(participantId) }
 function newProfile() {
   if (!confirm('Mula profil baru? Borang akan dikosongkan pada peranti ini. Profil lama kekal dalam Google Sheet.')) return;
@@ -142,7 +197,9 @@ function updateProgress() {
 function copyPrompt() { copyText($('promptBox').textContent).then(() => ($('copyStatus').textContent = '✓ Prompt disalin. Tampal ke ChatGPT.')).catch(() => ($('copyStatus').textContent = 'Pilih dan salin teks prompt secara manual.')) }
 function downloadProfile() { const blob = new Blob([profileText(collect())], { type: 'text/plain;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'LIVE-LARIS-Profil-Peserta.txt'; a.click(); URL.revokeObjectURL(a.href) }
 function openChatGPT() { window.open('https://chatgpt.com/', '_blank', 'noopener') }
+let currentStep = 'business';
 function next(id, scroll = true) {
+  currentStep = id;
   document.querySelectorAll('main section').forEach((s) => s.classList.toggle('hidden', s.id !== id));
   document.querySelectorAll('nav button[data-tab]').forEach((b) => { const on = b.dataset.tab === id; b.classList.toggle('active', on); if (on) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current') });
   // Land on the step itself (below the hero), not the top of the page.
@@ -150,13 +207,19 @@ function next(id, scroll = true) {
 }
 
 // Inline onclick handlers in index.html call these.
-Object.assign(window, { saveProfile, newProfile, makePrompt, approveOutput, copyPrompt, downloadProfile, openChatGPT, next });
+Object.assign(window, { saveProfile, saveBusiness, nextFromBusiness, ensureSummary, newProfile, makePrompt, approveOutput, copyPrompt, downloadProfile, openChatGPT, next });
 
-document.querySelectorAll('nav button[data-tab]').forEach((b) => b.addEventListener('click', () => next(b.dataset.tab)));
+document.querySelectorAll('nav button[data-tab]').forEach((b) => b.addEventListener('click', () => {
+  if (currentStep === 'business' && b.dataset.tab !== 'business') {
+    if (!checkProfile()) return; // step 1 must be complete first
+    ensureSummary(false);
+  }
+  next(b.dataset.tab);
+}));
 $('qcList').innerHTML = QC_ITEMS.map((q, i) => `<label><input type="checkbox" id="qc${i}"> ${q}</label>`).join('');
 loadCached(); renderModules(); renderApprovals(); updateProgress(); next('business', false);
 // Autosave a few seconds after the participant changes any field
 fields().forEach((e) => {
-  e.addEventListener('input', updateProgress);
+  e.addEventListener('input', () => { updateProgress(); if (e.getAttribute('aria-invalid') === 'true' && e.value.trim()) markField(e.id, false) });
   e.addEventListener('change', () => { updateProgress(); clearTimeout(autoTimer); setStatus('Perubahan belum disimpan…'); autoTimer = setTimeout(() => saveProfile(true), 3000) });
 });

@@ -147,6 +147,14 @@ input[type=checkbox]{width:20px;height:20px;min-height:0;padding:0;flex-shrink:0
 @media(max-width:760px){.leaks{grid-template-columns:1fr 100px}.leaks .sign{grid-column:1/-1}.leaks .h:last-child{display:none}}
 @media(max-width:430px){nav{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}.spinner{animation:none}}
+
+.reqnote{font-size:13px;color:var(--muted);margin:-8px 0 16px}.reqnote b{color:var(--red)}
+.help{display:block;font-size:13px;color:var(--muted);margin:6px 0 0}
+.field-error{font-size:13px;font-weight:600;color:var(--error-ink);background:var(--error-bg);border-radius:8px;padding:6px 10px;margin:6px 0 0}
+[aria-invalid="true"]{border-color:var(--red)!important;box-shadow:0 0 0 1px var(--red)}
+.ai-tag{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:2px 8px;border-radius:999px;background:var(--nude);font-size:12px;font-weight:700;vertical-align:1px}
+.ai-tag svg{width:13px;height:13px;color:var(--red)}
+.summary-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}.summary-row .help{margin:0}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -193,22 +201,24 @@ input[type=checkbox]{width:20px;height:20px;min-height:0;padding:0;flex-shrink:0
 
 <section id="business" class="panel">
 <div class="label">Langkah 01 · Profil bisnes</div>
-<h2>Profil Bisnes</h2><p class="sub">Kenali pemilik, model bisnes dan pelanggan. Gunakan satu produk atau servis utama sepanjang latihan.</p>
+<h2>Profil Bisnes</h2><p class="sub">Ceritakan serba sedikit tentang bisnes anda. Pilih jawapan yang paling dekat dengan keadaan sekarang.</p>
+<p class="reqnote">Ruangan bertanda <b>*</b> wajib diisi.</p>
 <div class="grid">
-<div class="field"><label for="owner">Nama pemilik</label><input id="owner" placeholder="Nama peserta"></div>
-<div class="field"><label for="businessName">Nama bisnes / jenama</label><input id="businessName" placeholder="Nama bisnes"></div>
-<div class="field"><label for="years">Tempoh operasi</label><select id="years"><option value="">— Pilih —</option><option>Belum mula</option><option>Bawah 1 tahun</option><option>1–3 tahun</option><option>4–5 tahun</option><option>6–10 tahun</option><option>Lebih 10 tahun</option></select></div>
-<div class="field"><label for="model">Model bisnes</label><select id="model"><option value="">— Pilih —</option><option>B2C — jual terus kepada pengguna</option><option>B2B — jual kepada bisnes</option><option>B2B2C — melalui ejen/reseller</option><option>D2C — jenama sendiri, jual terus</option><option>Dropship</option><option>Agent / Reseller</option><option>Affiliate</option><option>Marketplace seller</option><option>Subscription / Membership</option><option>Servis / Projek</option><option>Hybrid — gabungan model</option></select></div>
-<div class="field"><label for="industry">Industri</label><select id="industry"><option value="">— Pilih —</option><option>Makanan & Minuman</option><option>Fesyen & Pakaian</option><option>Kecantikan & Penjagaan Diri</option><option>Kesihatan & Wellness</option><option>Pendidikan & Latihan</option><option>Perkhidmatan Profesional</option><option>Automotif</option><option>Rumah & Dekorasi</option><option>Produk Bayi & Kanak-kanak</option><option>Teknologi & Elektronik</option><option>Pertanian & Ternakan</option><option>Pelancongan & Hospitaliti</option><option>Retail / Wholesale</option><option>Lain-lain</option></select></div>
-<div class="field"><label for="team">Saiz team</label><select id="team"><option value="">— Pilih —</option><option>Saya seorang</option><option>2–3 orang</option><option>4–10 orang</option><option>11–30 orang</option><option>Lebih 30 orang</option></select></div>
-<div class="field"><label for="location">Lokasi operasi</label><input id="location"></div>
-<div class="field"><label for="sales">Jualan bulanan</label><select id="sales"><option value="">— Pilih —</option><option>Bawah RM5,000</option><option>RM5,000–RM10,000</option><option>RM10,001–RM30,000</option><option>RM30,001–RM50,000</option><option>RM50,001–RM100,000</option><option>Lebih RM100,000</option><option>Belum konsisten</option></select></div>
-<div class="field"><label for="customer">Pelanggan sasaran</label><input id="customer"></div>
-<div class="field"><label for="age">Umur pelanggan</label><select id="age"><option value="">— Pilih —</option><option>18–24 tahun</option><option>25–34 tahun</option><option>35–44 tahun</option><option>45–54 tahun</option><option>55 tahun ke atas</option><option>Pelbagai umur</option></select></div>
-<div class="field full"><label for="customerNeed">Situasi atau masalah pelanggan</label><textarea id="customerNeed" placeholder="Dalam situasi apa masalah berlaku? Apa yang pelanggan risaukan sebelum membeli?"></textarea></div>
-<div class="field full"><label for="businessDesc">Penerangan ringkas bisnes</label><textarea id="businessDesc" placeholder="Apa yang bisnes jual, kepada siapa dan bagaimana pelanggan membeli?"></textarea></div>
+<div class="field"><label for="owner">Nama anda *</label><input id="owner" autocomplete="name" placeholder="Nama penuh" aria-required="true" data-required></div>
+<div class="field"><label for="businessName">Nama bisnes / jenama *</label><input id="businessName" autocomplete="organization" placeholder="Nama bisnes" aria-required="true" data-required></div>
+<div class="field"><label for="years">Berapa lama anda sudah berniaga? *</label><select id="years" aria-required="true" data-required><option value="">— Pilih —</option><option>Belum mula</option><option>Bawah 1 tahun</option><option>1–3 tahun</option><option>4–5 tahun</option><option>6–10 tahun</option><option>Lebih 10 tahun</option></select></div>
+<div class="field"><label for="model">Bagaimana anda berniaga? *</label><select id="model" aria-describedby="modelHelp" aria-required="true" data-required><option value="">— Pilih cara utama anda berniaga —</option><option>Saya jual terus kepada pelanggan</option><option>Saya jual kepada peniaga / syarikat</option><option>Produk saya dijual melalui ejen / reseller</option><option>Saya jual produk jenama sendiri terus kepada pelanggan</option><option>Saya ambil pesanan, pembekal hantar barang (dropship)</option><option>Saya jual semula produk orang (ejen / reseller)</option><option>Saya promosi produk orang dan dapat komisen (affiliate)</option><option>Saya berniaga melalui TikTok Shop / Shopee / Lazada</option><option>Pelanggan bayar secara bulanan / keahlian</option><option>Saya tawarkan perkhidmatan / buat kerja projek</option><option>Saya guna lebih daripada satu cara di atas</option><option>Saya tidak pasti</option></select><p class="help" id="modelHelp">Pilih satu yang paling sesuai. Kalau ada lebih daripada satu, pilih “Saya guna lebih daripada satu cara di atas”.</p></div>
+<div class="field"><label for="industry">Industri *</label><select id="industry" aria-required="true" data-required><option value="">— Pilih —</option><option>Makanan & Minuman</option><option>Fesyen & Pakaian</option><option>Kecantikan & Penjagaan Diri</option><option>Kesihatan & Wellness</option><option>Pendidikan & Latihan</option><option>Perkhidmatan Profesional</option><option>Automotif</option><option>Rumah & Dekorasi</option><option>Produk Bayi & Kanak-kanak</option><option>Teknologi & Elektronik</option><option>Pertanian & Ternakan</option><option>Pelancongan & Hospitaliti</option><option>Retail / Wholesale</option><option>Lain-lain</option></select></div>
+<div class="field"><label for="team">Berapa orang uruskan bisnes ini? *</label><select id="team" aria-required="true" data-required><option value="">— Pilih —</option><option>Saya seorang</option><option>2–3 orang</option><option>4–10 orang</option><option>11–30 orang</option><option>Lebih 30 orang</option></select></div>
+<div class="field"><label for="location">Pelanggan dari kawasan mana boleh membeli produk anda? *</label><input id="location" placeholder="Contoh: Seluruh Malaysia / Melaka sahaja / Sekitar Shah Alam" aria-required="true" data-required></div>
+<div class="field"><label for="sales">Anggaran jualan sebulan (bukan untung) *</label><select id="sales" aria-required="true" data-required><option value="">— Pilih —</option><option>Bawah RM5,000</option><option>RM5,000–RM10,000</option><option>RM10,001–RM30,000</option><option>RM30,001–RM50,000</option><option>RM50,001–RM100,000</option><option>Lebih RM100,000</option><option>Belum konsisten</option></select></div>
+<div class="field"><label for="customer">Pelanggan sasaran *</label><input id="customer" placeholder="Contoh: Ibu bekerja, orang bujang, jiran kawasan rumah" aria-required="true" data-required></div>
+<div class="field"><label for="age">Umur pelanggan *</label><select id="age" aria-required="true" data-required><option value="">— Pilih —</option><option>18–24 tahun</option><option>25–34 tahun</option><option>35–44 tahun</option><option>45–54 tahun</option><option>55 tahun ke atas</option><option>Pelbagai umur</option></select></div>
+<div class="field full"><label for="customerNeed">Apa masalah pelanggan yang produk atau servis anda boleh selesaikan? *</label><textarea id="customerNeed" placeholder="Contoh: Saya jual sambal siap makan untuk orang yang sibuk dan nak makan cepat." aria-required="true" data-required></textarea></div>
+<div class="field full"><label for="businessDesc">Bisnes anda secara ringkas <span class="ai-tag"><svg aria-hidden="true"><use href="#i-sparkle"/></svg>Ditulis oleh AI</span></label><textarea id="businessDesc" aria-describedby="summaryStatus" placeholder="AI akan menulis ringkasan ini selepas anda isi ruangan di atas. Anda boleh ubah jika perlu."></textarea>
+<div class="summary-row"><button type="button" class="btn light" id="summaryBtn" onclick="ensureSummary(true)"><svg aria-hidden="true"><use href="#i-sparkle"/></svg>Tulis semula dengan AI</button><span class="help" id="summaryStatus" aria-live="polite"></span></div></div>
 </div>
-<div class="actions"><button class="btn save" onclick="saveProfile(false)">Simpan Profil</button><button class="btn light" onclick="next('reality')">Seterusnya →</button></div><div class="status sync"></div>
+<div class="actions"><button class="btn save" onclick="saveBusiness()">Simpan Profil</button><button class="btn light" onclick="nextFromBusiness()">Seterusnya →</button></div><div class="status sync"></div>
 </section>
 
 <section id="reality" class="panel hidden">

@@ -9,7 +9,11 @@ const quiet = { error() {} };
 async function start({ writer, limit = 30 } = {}) {
   const store = memoryStore();
   const calls = [];
-  writer ||= { enabled: true, async write({ card, data, approvals }) { calls.push({ card, data, approvals }); return { prompt: `AI PROMPT ${card.id}`, source: 'ai', model: 'claude-sonnet-5-5', usage: { input_tokens: 10, output_tokens: 5 } } } };
+  writer ||= {
+    enabled: true,
+    async write({ card, data, approvals }) { calls.push({ card, data, approvals }); return { prompt: `AI PROMPT ${card.id}`, source: 'ai', model: 'claude-sonnet-5-5', usage: { input_tokens: 10, output_tokens: 5 } } },
+    async summarize({ data }) { calls.push({ summary: data }); return { text: `Saya menjalankan ${data.businessName}.`, source: 'ai', model: 'claude-sonnet-5-5', usage: { input_tokens: 4, output_tokens: 2 } } },
+  };
   const server = createApp({ store, writer, aiLimitPerIpHour: limit, log: quiet }).listen(0);
   await new Promise((r) => server.once('listening', r));
   const base = `http://127.0.0.1:${server.address().port}`;
@@ -77,6 +81,23 @@ test('with the AI off, the template prompt is returned', async (t) => {
   const r = (await s.req('/api/prompt', { card: 'reality', data: {} })).body;
   assert.equal(r.source, 'template');
   assert.match(r.prompt, /KAD AI: LIVE Reality Check/);
+});
+
+test('writes the business summary with the AI and logs it', async (t) => {
+  const s = await start(); t.after(s.close);
+  const r = await s.req('/api/summary', { data: { businessName: 'Sambal Mak Long', customer: 'Ibu bekerja' } });
+  assert.deepEqual(r.body, { text: 'Saya menjalankan Sambal Mak Long.', source: 'ai', reason: '' });
+  await new Promise((res) => setImmediate(res));
+  assert.equal(s.store.log[0].module, 'Ringkasan bisnes');
+  assert.equal(s.store.log[0].prompt, 'Saya menjalankan Sambal Mak Long.');
+});
+
+test('over the hourly AI limit, the summary falls back to a plain sentence', async (t) => {
+  const s = await start({ limit: 1 }); t.after(s.close);
+  await s.req('/api/summary', { data: { businessName: 'A' } });
+  const r = (await s.req('/api/summary', { data: { businessName: 'Sambal Mak Long', industry: 'Makanan & Minuman' } })).body;
+  assert.equal(r.source, 'template');
+  assert.match(r.text, /^Saya menjalankan Sambal Mak Long dalam industri makanan & minuman\./);
 });
 
 test('approves an AI output for a saved participant only', async (t) => {

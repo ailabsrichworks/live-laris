@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { cardById, templatePrompt } from '../public/js/cards.mjs';
+import { templateSummary } from './prompt-writer.mjs';
 
 const publicDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 const ID_RE = /^LL-[A-Z0-9]{8}$/;
@@ -81,6 +82,20 @@ export function createApp({ store, writer, aiLimitPerIpHour = 30, now = Date.now
       note: out.reason || '', prompt: out.prompt,
     }).catch((e) => log.error?.(`[log] ${e.message}`));
     res.json({ prompt: out.prompt, source: out.source, reason: out.reason || '' });
+  }));
+
+  app.post('/api/summary', wrap(async (req, res) => {
+    const data = cleanData(req.body?.data);
+    const participantId = normId(req.body?.participantId);
+    const out = writer.enabled && !allowAi(req.ip)
+      ? { text: templateSummary(data), source: 'template', reason: 'Had penggunaan AI sejam dicapai' }
+      : await writer.summarize({ data });
+    store.logPrompt({
+      participantId, businessName: data.businessName || '', productName: data.productName || '', module: 'Ringkasan bisnes',
+      source: out.source, model: out.model || '', inputTokens: out.usage?.input_tokens ?? '', outputTokens: out.usage?.output_tokens ?? '',
+      note: out.reason || '', prompt: out.text,
+    }).catch((e) => log.error?.(`[log] ${e.message}`));
+    res.json({ text: out.text, source: out.source, reason: out.reason || '' });
   }));
 
   app.post('/api/approve', wrap(async (req, res) => {
