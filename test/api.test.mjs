@@ -111,15 +111,21 @@ test('approves an AI output for a saved participant only', async (t) => {
 });
 
 const FULL = { owner: 'Aina', businessName: 'Sambal Mak Long', years: '1–3 tahun', model: 'Saya tidak pasti', industry: 'Makanan & Minuman',
-  team: 'Saya seorang', location: 'Seluruh Malaysia', sales: 'Bawah RM5,000', customer: 'Ibu bekerja', age: '25–34 tahun' };
+  team: 'Saya seorang', location: 'Seluruh Malaysia', sales: 'Bawah RM5,000', customer: 'Ibu bekerja', age: '25–34 tahun', customerNeed: 'Tak sempat masak' };
 
-test('the full report needs a complete profile and an approved Master Playbook', async (t) => {
+test('the full report needs a complete profile, the customer problem and an approved Master Playbook', async (t) => {
   const s = await start(); t.after(s.close);
   assert.equal((await s.req('/api/report', {})).status, 400);
   const { participantId } = (await s.req('/api/profile', { data: { owner: 'Aina' } })).body;
   const r = await s.req('/api/report', { participantId });
   assert.equal(r.status, 409);
-  assert.match(r.body.error, /Profil bisnes belum lengkap.*Master Playbook/);
+  assert.match(r.body.error, /Profil bisnes belum lengkap.*Masalah pelanggan.*Master Playbook/);
+  const { customerNeed, ...noNeed } = FULL;
+  await s.req('/api/profile', { participantId, data: { ...noNeed, customerNeed: ' ' } });
+  await s.req('/api/approve', { participantId, card: 'playbook', text: 'Panduan' });
+  const r2 = await s.req('/api/report', { participantId });
+  assert.equal(r2.status, 409);
+  assert.match(r2.body.error, /: Masalah pelanggan \(Product Blueprint\) belum diisi\.$/, 'only the customer problem is missing');
 });
 
 test('downloads the full report as a PDF and keeps a copy', async (t) => {

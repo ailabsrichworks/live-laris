@@ -41,11 +41,12 @@ const dateMY = (d) => d.toLocaleDateString('ms-MY', { day: 'numeric', month: 'lo
 export const reportFileName = (data, id) =>
   `Panduan LIVE · ${clean(data.businessName).replace(/[^\p{L}\p{N} .-]+/gu, '').trim().slice(0, 60) || 'Peserta'} · ${id}.pdf`;
 
-/** Ready when step 1 is filled in and the Master Playbook has been approved. */
+/** Ready when step 1 and the customer problem are filled in and the Master Playbook has been approved. */
 export function reportMissing(data = {}, approvals = {}) {
   const missing = [];
   const required = ['owner', 'businessName', 'years', 'model', 'industry', 'team', 'location', 'sales', 'customer', 'age'];
   if (required.some((k) => !String(data[k] ?? '').trim())) missing.push('Profil bisnes belum lengkap');
+  if (!String(data.customerNeed ?? '').trim()) missing.push('Masalah pelanggan (Product Blueprint) belum diisi');
   if (!approvals.playbook?.text) missing.push('Panduan LIVE Lengkap (Master Playbook) belum diluluskan');
   return missing;
 }

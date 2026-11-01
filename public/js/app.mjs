@@ -244,6 +244,7 @@ let reporting = false;
 function updateReportCard(qcDone) {
   const reqs = [
     [missingProfile().length === 0, 'Profil bisnes lengkap', true],
+    [Boolean($('customerNeed').value.trim()), 'Masalah pelanggan diisi (Product Blueprint)', true],
     [Boolean(approvals.playbook), 'Panduan LIVE Lengkap (Master Playbook) diluluskan', true],
     [qcDone === QC_ITEMS.length, `Semakan ${qcDone} / ${QC_ITEMS.length} siap`, false],
   ];
