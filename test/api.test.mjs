@@ -6,7 +6,7 @@ import { templatePrompt } from '../public/js/cards.mjs';
 
 const quiet = { error() {} };
 
-async function start({ writer, limit = 30, now } = {}) {
+async function start({ writer, limit = 30 } = {}) {
   const store = memoryStore();
   const calls = [];
   writer ||= {
@@ -15,7 +15,7 @@ async function start({ writer, limit = 30, now } = {}) {
     async summarize({ data }) { calls.push({ summary: data }); return { text: `Saya menjalankan ${data.businessName}.`, source: 'ai', model: 'claude-sonnet-5-5', usage: { input_tokens: 4, output_tokens: 2 } } },
     async playbook({ data, approvals }) { calls.push({ playbook: { data, approvals } }); return { text: `PLAYBOOK ${data.businessName}`, source: 'ai', model: 'claude-sonnet-5-5', usage: { input_tokens: 8, output_tokens: 6 } } },
   };
-  const server = createApp({ store, writer, aiLimitPerIpHour: limit, now, log: quiet }).listen(0);
+  const server = createApp({ store, writer, aiLimitPerIpHour: limit, log: quiet }).listen(0);
   await new Promise((r) => server.once('listening', r));
   const base = `http://127.0.0.1:${server.address().port}`;
   const req = async (path, body) => {
@@ -168,28 +168,34 @@ test('downloads the full report as a PDF and keeps a copy', async (t) => {
   assert.equal(Buffer.from(s.store.reports.get(participantId).base64, 'base64').length, pdf.length, 'the stored copy is the same file');
 });
 
-test('the report also stays at a short-lived link that phones can open or save, with the real file name', async (t) => {
-  let clock = 1_000_000;
-  const s = await start({ now: () => clock }); t.after(s.close);
+test('the page downloads the report with a plain form post, so phones get a real file like computers', async (t) => {
+  const s = await start(); t.after(s.close);
   const { participantId } = (await s.req('/api/profile', { data: FULL })).body;
   await s.req('/api/approve', { participantId, card: 'playbook', text: 'Panduan' });
-  const res = await fetch(`${s.base}/api/report`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ participantId }) });
-  const pdf = Buffer.from(await res.arrayBuffer());
-  const url = res.headers.get('x-report-url');
-  assert.match(url, /^\/api\/report\/file\/[\w-]{24}\/Panduan%20LIVE%20%C2%B7%20Sambal%20Mak%20Long\.pdf$/, 'the file name is the last part of the link');
-  const get = await fetch(s.base + url);
-  assert.equal(get.status, 200);
-  assert.equal(get.headers.get('content-type'), 'application/pdf');
-  assert.match(get.headers.get('content-disposition'), /^attachment; /);
-  assert.equal(Buffer.from(await get.arrayBuffer()).length, pdf.length, 'the same file');
-  const view = await fetch(`${s.base}${url}?view=1`);
-  assert.match(view.headers.get('content-disposition'), /^inline; .*filename\*=UTF-8''Panduan%20LIVE%20%C2%B7%20Sambal%20Mak%20Long\.pdf$/);
-  assert.equal((await fetch(`${s.base}${url}`)).status, 200, 'the link can be opened again');
-  assert.equal((await fetch(`${s.base}/api/report/file/not-a-real-token`)).status, 410);
-  clock += 31 * 60_000;
-  const old = await fetch(s.base + url);
-  assert.equal(old.status, 410, 'expires after 30 minutes');
-  assert.match(await old.text(), /tamat tempoh/);
+  const form = (body) => fetch(`${s.base}/api/report`, { method: 'POST', body: new URLSearchParams(body) });
+  const res = await form({ participantId });
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('content-type'), 'application/pdf');
+  assert.match(res.headers.get('content-disposition'), /^attachment; .*filename\*=UTF-8''Panduan%20LIVE%20%C2%B7%20Sambal%20Mak%20Long\.pdf$/);
+  assert.equal(Buffer.from(await res.arrayBuffer()).subarray(0, 5).toString(), '%PDF-');
+  const bad = await form({ participantId: 'LL-ZZZZZZZZ' });
+  assert.equal(bad.status, 404);
+  assert.match(bad.headers.get('content-type'), /^text\/html/, 'a failed form post gets a small page, not raw JSON');
+  const page = await bad.text();
+  assert.match(page, /Profil tidak dijumpai\./);
+  assert.match(page, /href="\/"/, 'with a way back');
+});
+
+test('the profile .txt is a plain form post download of the answers on screen', async (t) => {
+  const s = await start(); t.after(s.close);
+  const res = await fetch(`${s.base}/api/profile-text`, { method: 'POST', body: new URLSearchParams({ data: JSON.stringify(FULL) }) });
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get('content-type'), /^text\/plain/);
+  assert.match(res.headers.get('content-disposition'), /^attachment; filename="LIVE-LARIS-Profil-Peserta\.txt"/);
+  assert.match(await res.text(), /Sambal Mak Long/);
+  const bad = await fetch(`${s.base}/api/profile-text`, { method: 'POST', body: new URLSearchParams({ data: 'not json' }) });
+  assert.equal(bad.status, 400);
+  assert.match(await bad.text(), /Data tidak sah/);
 });
 
 test('if the Drive copy fails, the participant still gets the PDF', async (t) => {

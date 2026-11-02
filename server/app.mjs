@@ -1,8 +1,7 @@
 import path from 'node:path';
-import { randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
-import { CARDS, cardById, templatePrompt } from '../public/js/cards.mjs';
+import { CARDS, cardById, templatePrompt, profileText } from '../public/js/cards.mjs';
 import { templateSummary } from './prompt-writer.mjs';
 import { reportPdf, reportMissing, reportFileName } from './report-pdf.mjs';
 
@@ -13,7 +12,16 @@ const MAX_APPROVAL = 45000;
 
 const fail = (code, message) => Object.assign(new Error(message), { code });
 const wrap = (fn) => (req, res, next) => fn(req, res).catch(next);
-const attachment = (type, name) => `${type}; filename="${name.replace(/[^\x20-\x7e]/g, '-')}"; filename*=UTF-8''${encodeURIComponent(name)}`;
+const attachment = (name) => `attachment; filename="${name.replace(/[^\x20-\x7e]/g, '-')}"; filename*=UTF-8''${encodeURIComponent(name)}`;
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+// A form post that fails lands on this small page instead of raw JSON.
+function formError(res, err, log) {
+  const code = Number.isInteger(err.code) && err.code >= 400 && err.code < 500 ? err.code : 500;
+  if (code === 500) log.error?.(`[download] ${err.message}`);
+  const msg = code === 500 ? 'Ralat pelayan. Cuba lagi sebentar.' : err.message;
+  res.status(code).type('html').send(`<!doctype html><html lang="ms"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LIVE LARIS</title>`
+    + `<body style="font:16px/1.5 system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 16px;color:#1f1a17"><p>${esc(msg)}</p><p><a href="/" style="color:#b3302f;font-weight:700">← Kembali ke LIVE LARIS</a></p></body></html>`);
+}
 const normId = (v) => { const id = String(v || '').trim().toUpperCase(); return ID_RE.test(id) ? id : ''; };
 
 // Form answers: short string values under simple keys only (the Apps Script keeps only known columns).
@@ -50,17 +58,9 @@ export function createApp({ store, writer, aiLimitPerIpHour = 30, now = Date.now
   const app = express();
   const allowAi = hourlyLimiter(aiLimitPerIpHour, now);
   const allowReport = hourlyLimiter(20, now);
-  // Each built report also stays at a real, short-lived link: phone browsers that ignore the download attribute open this, not a blob: page.
-  const REPORT_TTL = 30 * 60_000, links = new Map();
-  const keepReport = (pdf, name) => {
-    const t = now();
-    for (const [k, v] of links) if (t - v.at > REPORT_TTL || links.size >= 100) links.delete(k);
-    const token = randomBytes(18).toString('base64url');
-    links.set(token, { pdf, name, at: t });
-    return `/api/report/file/${token}/${encodeURIComponent(name)}`; // the name in the path is what iOS uses when saving from its viewer
-  };
   app.set('trust proxy', 1); // Railway sits in front; req.ip is the visitor's address
   app.use(express.json({ limit: '400kb' }));
+  app.use(express.urlencoded({ extended: false, limit: '400kb' })); // the two downloads are plain form posts
   app.use(express.static(publicDir));
 
   app.get('/healthz', (req, res) => res.json({ ok: true }));
@@ -132,41 +132,39 @@ export function createApp({ store, writer, aiLimitPerIpHour = 30, now = Date.now
   }));
 
   // The full report: built from what's saved, downloaded by the participant, and kept in Drive with its link in the Sheet.
+  // The page sends it as a plain form post, so the browser itself downloads the reply: phones save a real file, same as computers.
   app.post('/api/report', wrap(async (req, res) => {
-    const participantId = normId(req.body?.participantId);
-    if (!participantId) throw fail(400, 'Simpan profil dahulu.');
-    if (!allowReport(req.ip)) throw fail(429, 'Terlalu banyak permintaan laporan. Cuba lagi sebentar.');
-    const p = await store.loadProfile(participantId);
-    if (!p) throw fail(404, 'Profil tidak dijumpai.');
-    const missing = reportMissing(p.data, p.approvals);
-    if (missing.length) throw fail(409, `Laporan belum boleh disediakan: ${missing.join('; ')}.`);
-    const pdf = await reportPdf({ participantId, data: p.data, approvals: p.approvals });
-    const name = reportFileName(p.data);
-    let saved = false;
     try {
-      await store.saveReport(participantId, pdf.toString('base64'), reportFileName(p.data, participantId));
-      saved = true;
+      const participantId = normId(req.body?.participantId);
+      if (!participantId) throw fail(400, 'Simpan profil dahulu.');
+      if (!allowReport(req.ip)) throw fail(429, 'Terlalu banyak permintaan laporan. Cuba lagi sebentar.');
+      const p = await store.loadProfile(participantId);
+      if (!p) throw fail(404, 'Profil tidak dijumpai.');
+      const missing = reportMissing(p.data, p.approvals);
+      if (missing.length) throw fail(409, `Laporan belum boleh disediakan: ${missing.join('; ')}.`);
+      const pdf = await reportPdf({ participantId, data: p.data, approvals: p.approvals });
+      const name = reportFileName(p.data);
+      let saved = false;
+      try {
+        await store.saveReport(participantId, pdf.toString('base64'), reportFileName(p.data, participantId));
+        saved = true;
+      } catch (e) {
+        log.error?.(`[report] Drive copy for ${participantId} failed: ${e.message}`); // the participant still gets their PDF
+      }
+      res.set({ 'content-type': 'application/pdf', 'content-disposition': attachment(name), 'x-report-saved': saved ? '1' : '0' });
+      res.send(pdf);
     } catch (e) {
-      log.error?.(`[report] Drive copy for ${participantId} failed: ${e.message}`); // the participant still gets their PDF
+      if (!req.is('urlencoded')) throw e;
+      formError(res, e, log);
     }
-    res.set({
-      'content-type': 'application/pdf',
-      'content-disposition': attachment('attachment', name),
-      'x-report-saved': saved ? '1' : '0',
-      'x-report-url': keepReport(pdf, name),
-    });
-    res.send(pdf);
   }));
 
-  // ?view=1 shows the PDF in the browser (Buka PDF); otherwise it downloads.
-  app.get('/api/report/file/:token{/:name}', (req, res) => {
-    const r = links.get(req.params.token);
-    if (!r || now() - r.at > REPORT_TTL) {
-      res.status(410).type('text/plain; charset=utf-8').send('Pautan laporan ini sudah tamat tempoh. Kembali ke LIVE LARIS dan tekan Muat Turun sekali lagi.');
-      return;
-    }
-    res.set({ 'content-type': 'application/pdf', 'content-disposition': attachment(req.query.view ? 'inline' : 'attachment', r.name), 'cache-control': 'private, max-age=1800' });
-    res.send(r.pdf);
+  // Profil Peserta (.txt) from the form as it is on screen, also a plain form post.
+  app.post('/api/profile-text', (req, res) => {
+    let data;
+    try { data = cleanData(JSON.parse(req.body?.data || '')) } catch (e) { formError(res, e.code ? e : fail(400, 'Data tidak sah.'), log); return }
+    res.set({ 'content-type': 'text/plain; charset=utf-8', 'content-disposition': attachment('LIVE-LARIS-Profil-Peserta.txt') });
+    res.send(profileText(data));
   });
 
   app.post('/api/approve', wrap(async (req, res) => {
