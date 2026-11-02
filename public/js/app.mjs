@@ -301,7 +301,14 @@ function updateProgress() {
   $('progressText').innerHTML = `<b>${pct}%</b> lengkap`;
 }
 // ---- Full report (PDF): ready once step 1 is complete and the Master Playbook is approved ----
-let reporting = false;
+let reporting = false, reportFile = null;
+const UA = navigator.userAgent;
+const PHONE = navigator.userAgentData?.mobile ?? (/Android|iPhone|iPad|iPod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1));
+const IN_APP = /FBAN|FBAV|FB_IAB|Instagram|Line\/|Telegram|TikTok|musical_ly|; wv\)/i.test(UA); // Facebook, Instagram, Telegram… and Android WebViews
+// Straight from the tap, so the share sheet is allowed; "Save to Files" / WhatsApp keep the real file name.
+function shareReport() {
+  navigator.share({ files: [reportFile], title: reportFile.name }).catch((err) => { if (err.name !== 'AbortError') location.href = $('reportOpen').href });
+}
 // "Tahniah! Anda berjaya" card: the three required items unlock the download; the checklist is encouraged.
 function updateReportCard(qcDone) {
   const reqs = [
@@ -323,21 +330,25 @@ function updateReportCard(qcDone) {
 }
 async function downloadReport() {
   if (reporting) return;
-  reporting = true; $('reportBtn').disabled = true;
+  reporting = true; $('reportBtn').disabled = true; $('reportGet').hidden = true;
   $('reportStatus').className = 'status'; $('reportStatus').textContent = 'Menyediakan laporan anda… (10–20 saat)';
   try {
     await saveProfile(true);
     const res = await fetch('/api/report', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ participantId }) });
     if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `HTTP ${res.status}`);
-    const blob = await res.blob();
     const name = decodeURIComponent((res.headers.get('content-disposition') || '').match(/filename\*=UTF-8''([^;]+)/)?.[1] || 'Panduan-LIVE.pdf');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    const url = res.headers.get('x-report-url');
+    reportFile = new File([await res.blob()], name, { type: 'application/pdf' });
+    $('reportOpen').href = `${url}?view=1`;
+    $('reportShare').hidden = !(PHONE && navigator.canShare?.({ files: [reportFile] }));
+    $('reportInApp').hidden = !IN_APP;
+    $('reportGet').hidden = false;
+    // Phones get buttons instead: a download started 10–20 s after the tap is ignored or shown as a blob: page there.
+    if (!PHONE) { const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove() }
     const saved = res.headers.get('x-report-saved') === '1';
     $('reportStatus').className = 'status ok';
-    $('reportStatus').textContent = saved ? '✓ Laporan dimuat turun. Satu salinan disimpan untuk penganjur program.'
-      : '✓ Laporan dimuat turun. (Salinan untuk penganjur belum dapat disimpan — sila maklumkan fasilitator.)';
+    $('reportStatus').textContent = (PHONE ? '✓ Laporan anda sedia. Tekan butang di bawah untuk simpan atau buka.' : '✓ Laporan dimuat turun.')
+      + (saved ? ' Satu salinan disimpan untuk penganjur program.' : ' (Salinan untuk penganjur belum dapat disimpan — sila maklumkan fasilitator.)');
   } catch (err) {
     $('reportStatus').className = 'status err'; $('reportStatus').textContent = '✗ Gagal menyediakan laporan: ' + err.message;
   } finally { reporting = false; updateProgress() }
@@ -346,7 +357,12 @@ async function downloadReport() {
 function copyPrompt() {
   if (playbookWritten) { copyText($('aiOutput').value).then(() => ($('copyStatus').textContent = '✓ Master Playbook disalin.')).catch(() => ($('copyStatus').textContent = 'Pilih dan salin teks playbook secara manual.')); return }
   copyText($('promptBox').textContent).then(() => ($('copyStatus').textContent = '✓ Prompt disalin. Tampal ke ChatGPT.')).catch(() => ($('copyStatus').textContent = 'Pilih dan salin teks prompt secara manual.')) }
-function downloadProfile() { const blob = new Blob([profileText(collect())], { type: 'text/plain;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'LIVE-LARIS-Profil-Peserta.txt'; a.click(); URL.revokeObjectURL(a.href) }
+function downloadProfile() {
+  const file = new File([profileText(collect())], 'LIVE-LARIS-Profil-Peserta.txt', { type: 'text/plain;charset=utf-8' });
+  if (PHONE && navigator.canShare?.({ files: [file] })) { navigator.share({ files: [file], title: file.name }).catch(() => {}); return }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000); // revoking straight away cancels the download in Safari
+}
 function openChatGPT() { window.open('https://chatgpt.com/', '_blank', 'noopener') }
 let currentStep = 'business';
 function next(id, scroll = true) {
@@ -359,7 +375,7 @@ function next(id, scroll = true) {
 }
 
 // Inline onclick handlers in index.html call these.
-Object.assign(window, { saveProfile, saveBusiness, nextFromBusiness, ensureSummary, downloadReport, newProfile, makePrompt, approveOutput, copyPrompt, downloadProfile, openChatGPT, next });
+Object.assign(window, { saveProfile, saveBusiness, nextFromBusiness, ensureSummary, downloadReport, shareReport, newProfile, makePrompt, approveOutput, copyPrompt, downloadProfile, openChatGPT, next });
 
 document.querySelectorAll('nav button[data-tab]').forEach((b) => b.addEventListener('click', () => {
   if (currentStep === 'business' && b.dataset.tab !== 'business') {

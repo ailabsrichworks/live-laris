@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { CARDS, cardById, templatePrompt } from '../public/js/cards.mjs';
@@ -12,6 +13,7 @@ const MAX_APPROVAL = 45000;
 
 const fail = (code, message) => Object.assign(new Error(message), { code });
 const wrap = (fn) => (req, res, next) => fn(req, res).catch(next);
+const attachment = (type, name) => `${type}; filename="${name.replace(/[^\x20-\x7e]/g, '-')}"; filename*=UTF-8''${encodeURIComponent(name)}`;
 const normId = (v) => { const id = String(v || '').trim().toUpperCase(); return ID_RE.test(id) ? id : ''; };
 
 // Form answers: short string values under simple keys only (the Apps Script keeps only known columns).
@@ -48,6 +50,15 @@ export function createApp({ store, writer, aiLimitPerIpHour = 30, now = Date.now
   const app = express();
   const allowAi = hourlyLimiter(aiLimitPerIpHour, now);
   const allowReport = hourlyLimiter(20, now);
+  // Each built report also stays at a real, short-lived link: phone browsers that ignore the download attribute open this, not a blob: page.
+  const REPORT_TTL = 30 * 60_000, links = new Map();
+  const keepReport = (pdf, name) => {
+    const t = now();
+    for (const [k, v] of links) if (t - v.at > REPORT_TTL || links.size >= 100) links.delete(k);
+    const token = randomBytes(18).toString('base64url');
+    links.set(token, { pdf, name, at: t });
+    return `/api/report/file/${token}/${encodeURIComponent(name)}`; // the name in the path is what iOS uses when saving from its viewer
+  };
   app.set('trust proxy', 1); // Railway sits in front; req.ip is the visitor's address
   app.use(express.json({ limit: '400kb' }));
   app.use(express.static(publicDir));
@@ -140,11 +151,23 @@ export function createApp({ store, writer, aiLimitPerIpHour = 30, now = Date.now
     }
     res.set({
       'content-type': 'application/pdf',
-      'content-disposition': `attachment; filename="${name.replace(/[^\x20-\x7e]/g, '-')}"; filename*=UTF-8''${encodeURIComponent(name)}`,
+      'content-disposition': attachment('attachment', name),
       'x-report-saved': saved ? '1' : '0',
+      'x-report-url': keepReport(pdf, name),
     });
     res.send(pdf);
   }));
+
+  // ?view=1 shows the PDF in the browser (Buka PDF); otherwise it downloads.
+  app.get('/api/report/file/:token{/:name}', (req, res) => {
+    const r = links.get(req.params.token);
+    if (!r || now() - r.at > REPORT_TTL) {
+      res.status(410).type('text/plain; charset=utf-8').send('Pautan laporan ini sudah tamat tempoh. Kembali ke LIVE LARIS dan tekan Muat Turun sekali lagi.');
+      return;
+    }
+    res.set({ 'content-type': 'application/pdf', 'content-disposition': attachment(req.query.view ? 'inline' : 'attachment', r.name), 'cache-control': 'private, max-age=1800' });
+    res.send(r.pdf);
+  });
 
   app.post('/api/approve', wrap(async (req, res) => {
     const participantId = normId(req.body?.participantId);
