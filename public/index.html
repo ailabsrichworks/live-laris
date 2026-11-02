@@ -84,6 +84,7 @@ nav button.newprofile svg{width:18px;height:18px}
 .grid{display:grid;grid-template-columns:1fr;gap:14px}
 @media(min-width:761px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .field{display:block}.field.full{grid-column:1/-1}
+.when{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:10px;max-width:440px}.when label{font-size:13px;font-weight:600;color:var(--muted);margin:0}.when input{margin-top:4px;padding:12px 10px}
 .field label,.fieldlabel{display:block;font-size:14px;font-weight:700;margin:0 0 6px}
 input,select,textarea{width:100%;min-height:48px;border:1px solid var(--field);border-radius:10px;padding:12px;background:#fff;font-size:16px;transition:border-color .15s}
 input:hover,select:hover,textarea:hover{border-color:#bfae96}
@@ -382,7 +383,7 @@ textarea.grow{min-height:48px;resize:none;overflow:hidden}
 <h4><svg aria-hidden="true"><use href="#i-chart"/></svg>1. Hasil LIVE Saya Sebelum Ini</h4>
 <p class="sub">Catat hasil LIVE terakhir sebelum kelas ini supaya kita boleh bandingkan nanti.</p>
 <div class="grid">
-<div class="field full"><label for="lastLiveAt">Bila LIVE terakhir anda dibuat?</label><input id="lastLiveAt" placeholder="Contoh: 30 Okt, 9 malam"></div>
+<div class="field full" role="group" aria-labelledby="lastLiveAtLabel"><span class="fieldlabel" id="lastLiveAtLabel">Bila LIVE terakhir anda dibuat?</span><input type="hidden" id="lastLiveAt"><div class="when"><label>Tarikh<input type="date" data-when="lastLiveAt" data-part="date"></label><label>Masa<input type="time" data-when="lastLiveAt" data-part="time" step="300"></label></div><p class="help" data-when-old="lastLiveAt" hidden></p></div>
 <div class="field"><label for="lastViewers">Jumlah viewers</label><input id="lastViewers" inputmode="numeric" placeholder="Contoh: 200"></div>
 <div class="field"><label for="lastOrders">Jumlah pesanan</label><input id="lastOrders" inputmode="numeric" placeholder="Contoh: 2"></div>
 </div>
@@ -395,7 +396,7 @@ textarea.grow{min-height:48px;resize:none;overflow:hidden}
 </div>
 <div class="mission-step">
 <h4><svg aria-hidden="true"><use href="#i-calendar"/></svg>3. Misi LIVE Saya Dalam 7 Hari</h4>
-<div class="field full"><label for="nextLiveAt">Bila anda akan buat LIVE menggunakan teknik baharu ini?</label><input id="nextLiveAt" placeholder="Contoh: 5 Nov, 9 malam" aria-describedby="nextLiveAtHelp"><p class="help" id="nextLiveAtHelp">Selepas LIVE, simpan jumlah viewers dan pesanan. Kita akan semak hasil ini bersama!</p></div>
+<div class="field full" role="group" aria-labelledby="nextLiveAtLabel"><span class="fieldlabel" id="nextLiveAtLabel">Bila anda akan buat LIVE menggunakan teknik baharu ini?</span><input type="hidden" id="nextLiveAt"><div class="when"><label>Tarikh<input type="date" data-when="nextLiveAt" data-part="date"></label><label>Masa<input type="time" data-when="nextLiveAt" data-part="time" step="300"></label></div><p class="help" data-when-old="nextLiveAt" hidden></p><p class="help">Pilih tarikh dalam 7 hari dari hari ini. Selepas LIVE, simpan jumlah viewers dan pesanan. Kita akan semak hasil ini bersama!</p></div>
 </div>
 <div class="mission-step">
 <h4><svg aria-hidden="true"><use href="#i-phone"/></svg>4. Semak Hasil Bersama KBSME</h4>

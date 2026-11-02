@@ -300,6 +300,41 @@ function updateProgress() {
   $('progressBar').setAttribute('aria-valuenow', String(pct));
   $('progressText').innerHTML = `<b>${pct}%</b> lengkap`;
 }
+// Misi 7 Hari dates: a date picker and a time picker, saved together in one fixed format in the hidden field, e.g. "5 Nov 2026, 9:00 PM".
+const MONTHS = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogo', 'Sep', 'Okt', 'Nov', 'Dis'];
+const WHEN_RE = /^(\d{1,2}) (Jan|Feb|Mac|Apr|Mei|Jun|Jul|Ogo|Sep|Okt|Nov|Dis) (\d{4})(?:, (\d{1,2}):(\d{2}) (AM|PM))?$/;
+const pad = (n) => String(n).padStart(2, '0');
+const isoDay = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const whenPart = (id, part) => document.querySelector(`[data-when="${id}"][data-part="${part}"]`);
+function whenToValue(id) {
+  const date = whenPart(id, 'date'), time = whenPart(id, 'time');
+  if (!date.value) { if (WHEN_RE.test($(id).value)) { $(id).value = ''; $(id).dispatchEvent(new Event('change')) } return } // cleared; an older free-text answer stays until replaced
+  if (!date.checkValidity()) { date.setAttribute('aria-invalid', 'true'); return } // out of range: keep the saved answer
+  date.removeAttribute('aria-invalid');
+  const [y, m, d] = date.value.split('-').map(Number);
+  let out = `${d} ${MONTHS[m - 1]} ${y}`;
+  if (time.value) { const [h, min] = time.value.split(':').map(Number); out += `, ${h % 12 || 12}:${pad(min)} ${h < 12 ? 'AM' : 'PM'}` }
+  $(id).value = out;
+  document.querySelector(`[data-when-old="${id}"]`).hidden = true;
+  $(id).dispatchEvent(new Event('change')); // autosave + progress
+}
+function whenFromValue(id) {
+  const v = $(id).value.trim(), m = v.match(WHEN_RE), old = document.querySelector(`[data-when-old="${id}"]`);
+  old.hidden = !v || Boolean(m);
+  if (!m) { if (v) old.textContent = `Jawapan sebelum ini: “${v}”. Pilih tarikh dan masa di atas untuk menggantikannya.`; return }
+  whenPart(id, 'date').value = `${m[3]}-${pad(MONTHS.indexOf(m[2]) + 1)}-${pad(m[1])}`;
+  whenPart(id, 'time').value = m[4] ? `${pad((Number(m[4]) % 12) + (m[6] === 'PM' ? 12 : 0))}:${m[5]}` : '';
+}
+function setupWhen() {
+  const today = new Date(), week = new Date(today); week.setDate(today.getDate() + 7);
+  whenPart('lastLiveAt', 'date').max = isoDay(today); // the last LIVE was before the class
+  Object.assign(whenPart('nextLiveAt', 'date'), { min: isoDay(today), max: isoDay(week) }); // the mission LIVE is within 7 days
+  for (const id of ['lastLiveAt', 'nextLiveAt']) {
+    whenFromValue(id);
+    for (const part of ['date', 'time']) whenPart(id, part).addEventListener('change', () => whenToValue(id));
+  }
+}
+
 // ---- Full report (PDF): ready once step 1 is complete and the Master Playbook is approved ----
 let reporting = false;
 // Facebook, Instagram, Telegram… and Android WebViews can't save files at all; those participants are told to open the page in Chrome / Safari.
@@ -368,7 +403,7 @@ document.querySelectorAll('nav button[data-tab]').forEach((b) => b.addEventListe
   next(b.dataset.tab);
 }));
 $('qcList').innerHTML = QC_ITEMS.map((q, i) => `<label><input type="checkbox" id="qc${i}"> ${q}</label>`).join('');
-loadCached(); platformFromValue(); renderModules(); renderApprovals(); updateProgress(); next('business', false);
+loadCached(); platformFromValue(); setupWhen(); renderModules(); renderApprovals(); updateProgress(); next('business', false);
 platformBoxes().forEach((b) => b.addEventListener('change', platformToValue));
 
 // "Perlu bantuan? Lihat contoh jawapan": an example chip fills its field (replace) or adds to it (append).
